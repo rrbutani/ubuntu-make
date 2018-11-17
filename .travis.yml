@@ -14,7 +14,8 @@ addons:
     - python3-gi-cairo
     - python3-apt
 
-env:
-  - TESTFOLDER="pep8 small"
-  - TESTFOLDER="medium"
+install:
+  env:
+    - TESTFOLDER="pep8 small"
+    - TESTFOLDER="medium"
 script: PATH="/usr/bin:$PATH" ./runtests $TESTFOLDER
