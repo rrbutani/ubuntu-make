@@ -15,7 +15,9 @@ addons:
     - python3-apt
 
 install:
-  env:
-    - TESTFOLDER="pep8 small"
-    - TESTFOLDER="medium"
+  - pip install -r requirements.txt
+
+env:
+  - TESTFOLDER="pep8 small"
+  - TESTFOLDER="medium"
 script: PATH="/usr/bin:$PATH" ./runtests $TESTFOLDER
