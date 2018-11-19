@@ -4,7 +4,7 @@ python:
 virtualenv:
   system_site_packages: true
 
-dist: xenial
+dist: trusty
 
 services:
   - docker
@@ -15,7 +15,7 @@ addons:
       - gir1.2-gtk-3.0
       - python3-gi
       - python3-gi-cairo
-      - python3-apt
+      - libapt-pkg-dev
 
 install:
   - curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py && python3 /tmp/get-pip.py --user
