@@ -174,10 +174,18 @@ For an easier development workflow, we encourage the use of virtualenv to test a
 ```sh
 $ virtualenv --python=python3 --system-site-packages env
 $ sudo apt-get install -qq apt apt-utils libapt-pkg-dev # those are the requirements to compile python-apt
-$ sudo apt-get install -qq python3-gi # not installable with pypi
-$ sudo apt-get install -qq bzr python3-dev # requires for pip install -r
+$ sudo apt-get install -qq python3-dev # required for pip install -r
 $ env/bin/pip install -r requirements.txt
 $ source env/bin/activate
+$ bin/umake
+```
+
+It's also possible to use pipenv, with the included Pipfile:
+```sh
+$ sudo apt-get install -qq apt apt-utils libapt-pkg-dev # those are the requirements to compile python-apt
+$ sudo apt-get install -qq python3-dev # required for pip install -r
+$ pipenv install
+$ pipenv shell
 $ bin/umake
 ```
 
