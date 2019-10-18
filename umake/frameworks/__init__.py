@@ -34,6 +34,7 @@ from umake.network.requirements_handler import RequirementsHandler
 from umake.settings import DEFAULT_INSTALL_TOOLS_PATH, UMAKE_FRAMEWORKS_ENVIRON_VARIABLE, DEFAULT_BINARY_LINK_PATH
 from umake.tools import ConfigHandler, NoneDict, classproperty, get_current_arch, get_current_ubuntu_version,\
     is_completion_mode, switch_to_current_user, MainLoop, get_user_frameworks_path
+from umake.interactions import DisplayMessage
 from umake.ui import UI
 
 
@@ -257,6 +258,13 @@ class BaseFramework(metaclass=abc.ABCMeta):
         switch_to_current_user()
 
     @abc.abstractmethod
+    def depends(self):
+        """Method call to list depends for current framework"""
+        if not self.is_installable:
+            logger.error(_("Framework {} is not installable".format(self.name)))
+            UI.return_main_screen(status_code=2)
+
+    @abc.abstractmethod
     def remove(self):
         """Method call to remove the current framework"""
         if not self.is_installed:
@@ -293,6 +301,8 @@ class BaseFramework(metaclass=abc.ABCMeta):
                                                                         "destdir should contain a /"))
         this_framework_parser.add_argument('-r', '--remove', action="store_true",
                                            help=_("Remove framework if installed"))
+        this_framework_parser.add_argument('-d', '--depends', action="store_true",
+                                           help=_("List dependencies"))
         if self.expect_license:
             this_framework_parser.add_argument('--accept-license', dest="accept_license", action="store_true",
                                                help=_("Accept license without prompting"))
@@ -307,6 +317,12 @@ class BaseFramework(metaclass=abc.ABCMeta):
                 logger.error(message)
                 UI.return_main_screen(status_code=2)
             self.remove()
+        if args.depends:
+            if args.destdir:
+                message = "You can't specify a destination dir while listing framework dependencies"
+                logger.error(message)
+                UI.return_main_screen(status_code=2)
+            self.depends()
         else:
             install_path = None
             auto_accept_license = False
