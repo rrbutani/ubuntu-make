@@ -24,15 +24,17 @@ import umake.frameworks
 
 
 class ACategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
         super().__init__(name="Category A", description="Category A description")
 
 
 class FrameworkA(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework A", description="Description for framework A",
-                         install_path_dir="custom/frameworka", **kwargs)
+        super().__init__(
+            name="Framework A",
+            description="Description for framework A",
+            install_path_dir="custom/frameworka",
+            **kwargs
+        )
 
     # No setup() or other virtual interfaces

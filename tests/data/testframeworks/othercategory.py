@@ -24,16 +24,15 @@ import umake.frameworks
 
 
 class BCategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
         super().__init__(name="Category/B", description="Category B description")
 
 
 class FrameworkA(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework A", description="Description for framework A",
-                         **kwargs)
+        super().__init__(
+            name="Framework A", description="Description for framework A", **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()
@@ -47,10 +46,10 @@ class FrameworkA(umake.frameworks.BaseFramework):
 
 
 class FrameworkB(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework/B", description="Description for framework B",
-                         **kwargs)
+        super().__init__(
+            name="Framework/B", description="Description for framework B", **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()

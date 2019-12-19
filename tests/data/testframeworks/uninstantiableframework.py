@@ -24,7 +24,6 @@ import umake.frameworks
 
 
 class Uninstantiable(umake.frameworks.BaseFramework):
-
     def __new__(cls, *args, **kwargs):
         "This class is not meant to be instantiated, so __new__ returns None."
         if cls == Uninstantiable:
@@ -42,7 +41,9 @@ class Uninstantiable(umake.frameworks.BaseFramework):
 
 
 class InheritedFromUninstantiable(Uninstantiable):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Inherited From Uninstantiable", description="Framework Inheriting Uninstantiable",
-                         **kwargs)
+        super().__init__(
+            name="Inherited From Uninstantiable",
+            description="Framework Inheriting Uninstantiable",
+            **kwargs
+        )

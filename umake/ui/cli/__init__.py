@@ -27,7 +27,13 @@ import os
 from progressbar import ProgressBar, BouncingBar
 import readline
 import sys
-from umake.interactions import InputText, TextWithChoices, LicenseAgreement, DisplayMessage, UnknownProgress
+from umake.interactions import (
+    InputText,
+    TextWithChoices,
+    LicenseAgreement,
+    DisplayMessage,
+    UnknownProgress,
+)
 from umake.ui import UI
 from umake.frameworks import BaseCategory, list_frameworks
 from umake.tools import InputError, MainLoop
@@ -36,7 +42,7 @@ from umake.settings import get_version
 logger = logging.getLogger(__name__)
 
 
-def rlinput(prompt, prefill=''):
+def rlinput(prompt, prefill=""):
     readline.set_startup_hook(lambda: readline.insert_text(prefill))
     try:
         return input(prompt + " ")
@@ -45,7 +51,6 @@ def rlinput(prompt, prefill=''):
 
 
 class CliUI(UI):
-
     def __init__(self):
         # This this UI as current
         super().__init__(self)
@@ -59,7 +64,9 @@ class CliUI(UI):
         while True:
             try:
                 if isinstance(contentType, InputText):
-                    contentType.run_callback(result=rlinput(contentType.content, contentType.default_input))
+                    contentType.run_callback(
+                        result=rlinput(contentType.content, contentType.default_input)
+                    )
                 elif isinstance(contentType, LicenseAgreement):
                     print(contentType.content)
                     contentType.choose(answer=input(contentType.input))
@@ -77,7 +84,11 @@ class CliUI(UI):
                     # don't recall the callback
                     return False
                 else:
-                    logger.error("Unexcepted content type to display to CLI UI: {}".format(contentType))
+                    logger.error(
+                        "Unexcepted content type to display to CLI UI: {}".format(
+                            contentType
+                        )
+                    )
                     MainLoop().quit(status_code=1)
                 break
             except InputError as e:
@@ -118,7 +129,7 @@ def mangle_args_for_default_framework(args):
         if not category_name and arg in ("--remove", "-r"):
             args_to_append.append(arg)
             continue
-        if not arg.startswith('-') and not skip_all:
+        if not arg.startswith("-") and not skip_all:
             if not category_name:
                 if arg in BaseCategory.categories.keys():
                     category_name = arg
@@ -136,12 +147,18 @@ def mangle_args_for_default_framework(args):
                     result_args.append(arg)
                     continue
                 # take default framework if any after some sanitization check
-                elif BaseCategory.categories[category_name].default_framework is not None:
+                elif (
+                    BaseCategory.categories[category_name].default_framework is not None
+                ):
                     # before considering automatically inserting default framework, check that this argument has
                     # some path separator into it. This is to avoid typos in framework selection and selecting default
                     # framework with installation path where we didn't want to.
                     if os.path.sep in arg:
-                        result_args.append(BaseCategory.categories[category_name].default_framework.prog_name)
+                        result_args.append(
+                            BaseCategory.categories[
+                                category_name
+                            ].default_framework.prog_name
+                        )
                     # current arg will be appending in pending_args
                 else:
                     skip_all = True  # will just append everything at the end
@@ -150,7 +167,9 @@ def mangle_args_for_default_framework(args):
     # this happened only if there is no argument after the category name
     if category_name and not framework_completed:
         if BaseCategory.categories[category_name].default_framework is not None:
-            result_args.append(BaseCategory.categories[category_name].default_framework.prog_name)
+            result_args.append(
+                BaseCategory.categories[category_name].default_framework.prog_name
+            )
 
     # let the rest in
     result_args.extend(pending_args)
@@ -175,7 +194,9 @@ def get_frameworks_list_output(args):
             if category["category_name"] == "main" and len(category["frameworks"]) == 0:
                 continue
 
-            print_result += "{}: {}".format(category["category_name"], category["category_description"])
+            print_result += "{}: {}".format(
+                category["category_name"], category["category_description"]
+            )
 
             cat_is_installed = str()
             if category["is_installed"] == BaseCategory.NOT_INSTALLED:
@@ -191,28 +212,39 @@ def get_frameworks_list_output(args):
             print_result += "\n"
 
             # Sort the frameworks to prevent a random list at each new program execution
-            for framework in sorted(category["frameworks"], key=lambda fram: fram["framework_name"]):
+            for framework in sorted(
+                category["frameworks"], key=lambda fram: fram["framework_name"]
+            ):
                 if args.list_available:
                     if not framework["is_installable"]:
                         continue
 
-                print_result += "\t{}: {}".format(framework["framework_name"], framework["framework_description"])
+                print_result += "\t{}: {}".format(
+                    framework["framework_name"], framework["framework_description"]
+                )
 
                 if not framework["is_installable"]:
-                    print_result = _("{} [not installable on this machine]".format(print_result))
+                    print_result = _(
+                        "{} [not installable on this machine]".format(print_result)
+                    )
                 elif framework["is_installed"]:
                     print_result = _("{} [installed]".format(print_result))
 
-                print_result += '\n'
+                print_result += "\n"
     elif args.list_installed:
         # Sort the categories to prevent a random list at each new program execution
         for category in sorted(categories, key=lambda cat: cat["category_name"]):
             # Sort the frameworks to prevent a random list at each new program execution
-            for framework in sorted(category["frameworks"], key=lambda fram: fram["framework_name"]):
+            for framework in sorted(
+                category["frameworks"], key=lambda fram: fram["framework_name"]
+            ):
                 if framework["is_installed"]:
-                    print_result += "{}: {}\n".format(framework["framework_name"],
-                                                      framework["framework_description"])
-                    print_result += "\t{}: {}\n".format(_("path"), framework["install_path"])
+                    print_result += "{}: {}\n".format(
+                        framework["framework_name"], framework["framework_description"]
+                    )
+                    print_result += "\t{}: {}\n".format(
+                        _("path"), framework["install_path"]
+                    )
 
         if not print_result:
             print_result = _("No frameworks are currently installed")
@@ -222,7 +254,9 @@ def get_frameworks_list_output(args):
 
 def main(parser):
     """Main entry point of the cli command"""
-    categories_parser = parser.add_subparsers(help='Developer environment', dest="category")
+    categories_parser = parser.add_subparsers(
+        help="Developer environment", dest="category"
+    )
     for category in BaseCategory.categories.values():
         category.install_category_parser(categories_parser)
 

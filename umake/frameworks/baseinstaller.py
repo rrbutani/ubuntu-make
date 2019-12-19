@@ -30,24 +30,40 @@ import os
 import shutil
 import umake.frameworks
 from umake.decompressor import Decompressor
-from umake.interactions import InputText, YesNo, LicenseAgreement, DisplayMessage, UnknownProgress
+from umake.interactions import (
+    InputText,
+    YesNo,
+    LicenseAgreement,
+    DisplayMessage,
+    UnknownProgress,
+)
 from umake.network.download_center import DownloadCenter, DownloadItem
 from umake.network.requirements_handler import RequirementsHandler
 from umake.ui import UI
-from umake.tools import MainLoop, strip_tags, launcher_exists, get_icon_path, get_launcher_path, \
-    Checksum, remove_framework_envs_from_user, add_exec_link
+from umake.tools import (
+    MainLoop,
+    strip_tags,
+    launcher_exists,
+    get_icon_path,
+    get_launcher_path,
+    Checksum,
+    remove_framework_envs_from_user,
+    add_exec_link,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class BaseInstaller(umake.frameworks.BaseFramework):
 
-    DIRECT_COPY_EXT = ['.svg', '.png', '.ico', '.jpg', '.jpeg']
+    DIRECT_COPY_EXT = [".svg", ".png", ".ico", ".jpg", ".jpeg"]
     # Framework environment variables are added to `~/.profile` which may
     # require logging back into your session for the changes to be picked up.
     # Use `RELOGIN_REQUIRE_MSG` to alert users to this fact, in `post_install`
     # function. {} in replaced with the framework name at runtime.
-    RELOGIN_REQUIRE_MSG = _("You may need to log back in for your {} installation to work properly")
+    RELOGIN_REQUIRE_MSG = _(
+        "You may need to log back in for your {} installation to work properly"
+    )
 
     def __new__(cls, *args, **kwargs):
         "This class is not meant to be instantiated, so __new__ returns None."
@@ -61,15 +77,23 @@ class BaseInstaller(umake.frameworks.BaseFramework):
         having a set of downloads to proceed, some eventual supported_archs."""
         self.download_page = kwargs["download_page"]
         self.checksum_type = kwargs.get("checksum_type", None)
-        self.dir_to_decompress_in_tarball = kwargs.get("dir_to_decompress_in_tarball", "")
+        self.dir_to_decompress_in_tarball = kwargs.get(
+            "dir_to_decompress_in_tarball", ""
+        )
         self.required_files_path = kwargs.get("required_files_path", [])
         self.desktop_filename = kwargs.get("desktop_filename", None)
         self.icon_filename = kwargs.get("icon_filename", None)
         self.match_last_link = kwargs.get("match_last_link", False)
         self.json = kwargs.get("json", False)
-        for extra_arg in ["download_page", "checksum_type", "dir_to_decompress_in_tarball",
-                          "desktop_filename", "icon_filename", "required_files_path",
-                          "match_last_link"]:
+        for extra_arg in [
+            "download_page",
+            "checksum_type",
+            "dir_to_decompress_in_tarball",
+            "desktop_filename",
+            "icon_filename",
+            "required_files_path",
+            "match_last_link",
+        ]:
             with suppress(KeyError):
                 kwargs.pop(extra_arg)
         super().__init__(*args, **kwargs)
@@ -82,7 +106,7 @@ class BaseInstaller(umake.frameworks.BaseFramework):
     @property
     def exec_link_name(self):
         if self.desktop_filename:
-            return self.desktop_filename.split('.')[0]
+            return self.desktop_filename.split(".")[0]
         return None
 
     @property
@@ -106,8 +130,14 @@ class BaseInstaller(umake.frameworks.BaseFramework):
 
         # first step, check if installed
         if self.is_installed:
-            UI.display(YesNo("{} is already installed on your system, do you want to reinstall "
-                             "it anyway?".format(self.name), self.reinstall, UI.return_main_screen))
+            UI.display(
+                YesNo(
+                    "{} is already installed on your system, do you want to reinstall "
+                    "it anyway?".format(self.name),
+                    self.reinstall,
+                    UI.return_main_screen,
+                )
+            )
         else:
             self.confirm_path(self.arg_install_path)
 
@@ -129,7 +159,9 @@ class BaseInstaller(umake.frameworks.BaseFramework):
         if self.desktop_filename:
             with suppress(FileNotFoundError):
                 os.remove(get_launcher_path(self.desktop_filename))
-                os.remove(os.path.join(self.default_binary_link_path, self.exec_link_name))
+                os.remove(
+                    os.path.join(self.default_binary_link_path, self.exec_link_name)
+                )
         if self.icon_filename:
             with suppress(FileNotFoundError):
                 os.remove(get_icon_path(self.icon_filename))
@@ -143,14 +175,20 @@ class BaseInstaller(umake.frameworks.BaseFramework):
 
     def set_exec_path(self):
         if self.desktop_filename:
-            self.exec_path = os.path.join(self.install_path, self.required_files_path[0])
+            self.exec_path = os.path.join(
+                self.install_path, self.required_files_path[0]
+            )
 
     def confirm_path(self, path_dir=""):
         """Confirm path dir"""
 
         if not path_dir:
             logger.debug("No installation path provided. Requesting one.")
-            UI.display(InputText("Choose installation path:", self.confirm_path, self.install_path))
+            UI.display(
+                InputText(
+                    "Choose installation path:", self.confirm_path, self.install_path
+                )
+            )
             return
 
         logger.debug("Installation path provided. Checking if exists.")
@@ -159,12 +197,20 @@ class BaseInstaller(umake.frameworks.BaseFramework):
                 # we already told we were ok to overwrite as it was the previous install path
                 if path_dir not in self._paths_to_clean:
                     if path_dir == "/":
-                        logger.error("This doesn't seem wise. We won't let you shoot in your feet.")
+                        logger.error(
+                            "This doesn't seem wise. We won't let you shoot in your feet."
+                        )
                         self.confirm_path()
                         return
                     self.install_path = path_dir  # we don't set it before to not repropose / as installation path
-                    UI.display(YesNo("{} isn't an empty directory, do you want to remove its content and install "
-                                     "there?".format(path_dir), self.set_installdir_to_clean, UI.return_main_screen))
+                    UI.display(
+                        YesNo(
+                            "{} isn't an empty directory, do you want to remove its content and install "
+                            "there?".format(path_dir),
+                            self.set_installdir_to_clean,
+                            UI.return_main_screen,
+                        )
+                    )
                     return
         self.install_path = path_dir
         self.set_exec_path()
@@ -178,7 +224,11 @@ class BaseInstaller(umake.frameworks.BaseFramework):
 
     def download_provider_page(self):
         logger.debug("Download application provider page")
-        DownloadCenter([DownloadItem(self.download_page)], self.get_metadata_and_check_license, download=False)
+        DownloadCenter(
+            [DownloadItem(self.download_page)],
+            self.get_metadata_and_check_license,
+            download=False,
+        )
 
     def parse_license(self, line, license_txt, in_license):
         """Parse license per line, eventually write to license_txt if it's in the license part.
@@ -201,11 +251,15 @@ class BaseInstaller(umake.frameworks.BaseFramework):
 
         error_msg = result[self.download_page].error
         if error_msg:
-            logger.error("An error occurred while downloading {}: {}".format(self.download_page, error_msg))
+            logger.error(
+                "An error occurred while downloading {}: {}".format(
+                    self.download_page, error_msg
+                )
+            )
             UI.return_main_screen(status_code=1)
 
         self.new_download_url = None
-        self.shasum_read_method = hasattr(self, 'get_sha_and_start_download')
+        self.shasum_read_method = hasattr(self, "get_sha_and_start_download")
         with StringIO() as license_txt:
             url, checksum = (None, None)
             page = result[self.download_page]
@@ -217,8 +271,9 @@ class BaseInstaller(umake.frameworks.BaseFramework):
                     # we want to download the latest version (beta/development)
                     # So we get the first element in the json tree.
                     # In the framework we only change the url and this condition is satisfied.
-                    if self.download_page.startswith("https://api.github.com") and\
-                       not self.download_page.endswith("/latest"):
+                    if self.download_page.startswith(
+                        "https://api.github.com"
+                    ) and not self.download_page.endswith("/latest"):
                         latest = latest[0]
                     url = None
                     in_download = False
@@ -227,7 +282,9 @@ class BaseInstaller(umake.frameworks.BaseFramework):
                         if not self.url:
                             raise IndexError
                         else:
-                            logger.debug("We set a temporary url while fetching the checksum")
+                            logger.debug(
+                                "We set a temporary url while fetching the checksum"
+                            )
                             url = self.url
                 except (json.JSONDecodeError, IndexError):
                     logger.error("Can't parse the download URL from the download page.")
@@ -241,48 +298,77 @@ class BaseInstaller(umake.frameworks.BaseFramework):
                     line_content = line.decode()
 
                     if self.expect_license and not self.auto_accept_license:
-                        in_license = self.parse_license(line_content, license_txt, in_license)
+                        in_license = self.parse_license(
+                            line_content, license_txt, in_license
+                        )
 
                     # always take the first valid (url, checksum) if not match_last_link is set to True:
                     download = None
                     # if not in_download:
-                    if (url is None or (self.checksum_type and not checksum) or
-                       self.match_last_link) and\
-                       not(self.shasum_read_method and self.new_download_url):
-                        (download, in_download) = self.parse_download_link(line_content, in_download)
+                    if (
+                        url is None
+                        or (self.checksum_type and not checksum)
+                        or self.match_last_link
+                    ) and not (self.shasum_read_method and self.new_download_url):
+                        (download, in_download) = self.parse_download_link(
+                            line_content, in_download
+                        )
                     if download is not None:
                         (newurl, new_checksum) = download
                         url = newurl if newurl is not None else url
-                        checksum = new_checksum if new_checksum is not None else checksum
+                        checksum = (
+                            new_checksum if new_checksum is not None else checksum
+                        )
                         if url is not None:
                             if self.checksum_type and checksum:
-                                logger.debug("Found download link for {}, checksum: {}".format(url, checksum))
+                                logger.debug(
+                                    "Found download link for {}, checksum: {}".format(
+                                        url, checksum
+                                    )
+                                )
                             elif not self.checksum_type:
                                 logger.debug("Found download link for {}".format(url))
-            if hasattr(self, 'get_sha_and_start_download'):
-                logger.debug('Run get_sha_and_start_download')
-                DownloadCenter(urls=[DownloadItem(self.new_download_url, None)],
-                               on_done=self.get_sha_and_start_download, download=False)
+            if hasattr(self, "get_sha_and_start_download"):
+                logger.debug("Run get_sha_and_start_download")
+                DownloadCenter(
+                    urls=[DownloadItem(self.new_download_url, None)],
+                    on_done=self.get_sha_and_start_download,
+                    download=False,
+                )
             else:
                 self.check_data_and_start_download(url, checksum, license_txt)
 
-    def check_data_and_start_download(self, url=None, checksum=None, license_txt=StringIO()):
+    def check_data_and_start_download(
+        self, url=None, checksum=None, license_txt=StringIO()
+    ):
         if url is None:
-            logger.error("Download page changed its syntax or is not parsable (url missing)")
+            logger.error(
+                "Download page changed its syntax or is not parsable (url missing)"
+            )
             UI.return_main_screen(status_code=1)
-        if (self.checksum_type and checksum is None):
-            logger.error("Download page changed its syntax or is not parsable (checksum missing)")
+        if self.checksum_type and checksum is None:
+            logger.error(
+                "Download page changed its syntax or is not parsable (checksum missing)"
+            )
             logger.error("URL is: {}".format(url))
             UI.return_main_screen(status_code=1)
-        self.download_requests.append(DownloadItem(url, Checksum(self.checksum_type, checksum)))
+        self.download_requests.append(
+            DownloadItem(url, Checksum(self.checksum_type, checksum))
+        )
 
         if license_txt.getvalue() != "":
             logger.debug("Check license agreement.")
-            UI.display(LicenseAgreement(strip_tags(license_txt.getvalue()).strip(),
-                                        self.start_download_and_install,
-                                        UI.return_main_screen))
+            UI.display(
+                LicenseAgreement(
+                    strip_tags(license_txt.getvalue()).strip(),
+                    self.start_download_and_install,
+                    UI.return_main_screen,
+                )
+            )
         elif self.expect_license and not self.auto_accept_license:
-            logger.error("We were expecting to find a license on the download page, we didn't.")
+            logger.error(
+                "We were expecting to find a license on the download page, we didn't."
+            )
             UI.return_main_screen(status_code=1)
         else:
             self.start_download_and_install()
@@ -297,10 +383,16 @@ class BaseInstaller(umake.frameworks.BaseFramework):
         self._download_done_callback_called = False
         UI.display(DisplayMessage("Downloading and installing requirements"))
         self.pbar = ProgressBar().start()
-        self.pkg_to_install = RequirementsHandler().install_bucket(self.packages_requirements,
-                                                                   self.get_progress_requirement,
-                                                                   self.requirement_done)
-        DownloadCenter(urls=self.download_requests, on_done=self.download_done, report=self.get_progress_download)
+        self.pkg_to_install = RequirementsHandler().install_bucket(
+            self.packages_requirements,
+            self.get_progress_requirement,
+            self.requirement_done,
+        )
+        DownloadCenter(
+            urls=self.download_requests,
+            on_done=self.download_done,
+            report=self.get_progress_download,
+        )
 
     @MainLoop.in_mainloop_thread
     def get_progress(self, progress_download, progress_requirement):
@@ -322,21 +414,30 @@ class BaseInstaller(umake.frameworks.BaseFramework):
                     return
             else:
                 # we only update if we got a progress from both sides
-                if self.last_progress_download is None or self.last_progress_requirement is None:
+                if (
+                    self.last_progress_download is None
+                    or self.last_progress_requirement is None
+                ):
                     return
                 else:
                     # apply a minimum of 15% (no download or small download + install time)
-                    self.balance_requirement_download = max(self.pkg_size_download /
-                                                            (self.pkg_size_download + self.total_download_size),
-                                                            0.15)
+                    self.balance_requirement_download = max(
+                        self.pkg_size_download
+                        / (self.pkg_size_download + self.total_download_size),
+                        0.15,
+                    )
 
-        if not self.pbar.finished:  # drawing is delayed, so ensure we are not done first
+        if (
+            not self.pbar.finished
+        ):  # drawing is delayed, so ensure we are not done first
             progress = self._calculate_progress()
             self.pbar.update(progress)
 
     def _calculate_progress(self):
-        progress = self.balance_requirement_download * self.last_progress_requirement +\
-            (1 - self.balance_requirement_download) * self.last_progress_download
+        progress = (
+            self.balance_requirement_download * self.last_progress_requirement
+            + (1 - self.balance_requirement_download) * self.last_progress_download
+        )
         normalized_progress = max(0, progress)
         normalized_progress = min(normalized_progress, 100)
         return normalized_progress
@@ -391,7 +492,9 @@ class BaseInstaller(umake.frameworks.BaseFramework):
     @MainLoop.in_mainloop_thread
     def download_and_requirements_done(self):
         # wait for both side to be done
-        if self._download_done_callback_called or (not self.result_download or not self.result_requirement):
+        if self._download_done_callback_called or (
+            not self.result_download or not self.result_requirement
+        ):
             return
         self._download_done_callback_called = True
 
@@ -399,7 +502,11 @@ class BaseInstaller(umake.frameworks.BaseFramework):
         # display eventual errors
         error_detected = False
         if self.result_requirement.error:
-            logger.error("Package requirements can't be met: {}".format(self.result_requirement.error))
+            logger.error(
+                "Package requirements can't be met: {}".format(
+                    self.result_requirement.error
+                )
+            )
             error_detected = True
 
         # check for any errors and collect fds
@@ -433,10 +540,13 @@ class BaseInstaller(umake.frameworks.BaseFramework):
                     direct_copy = True
                     break
             if direct_copy:
-                shutil.copy2(fd.name, os.path.join(self.install_path, os.path.basename(fd.name)))
+                shutil.copy2(
+                    fd.name, os.path.join(self.install_path, os.path.basename(fd.name))
+                )
             else:
-                decompress_fds[fd] = Decompressor.DecompressOrder(dir=self.dir_to_decompress_in_tarball,
-                                                                  dest=self.install_path)
+                decompress_fds[fd] = Decompressor.DecompressOrder(
+                    dir=self.dir_to_decompress_in_tarball, dest=self.install_path
+                )
         Decompressor(decompress_fds, self.decompress_and_install_done)
         UI.display(UnknownProgress(self.iterate_until_install_done))
 

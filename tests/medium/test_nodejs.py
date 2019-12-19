@@ -33,20 +33,30 @@ class NodejsInContainer(ContainerTests, test_nodejs.NodejsTests):
         self.hosts = {443: ["nodejs.org"]}
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "nodejs", "nodejs-lang")
+        self.installed_path = os.path.join(
+            self.install_base_path, "nodejs", "nodejs-lang"
+        )
 
     def test_existing_prefix(self):
-        subprocess.call(self.command_as_list(['echo', '''"prefix = test" > ~/.npmrc''']))
-        self.child = spawn_process(self.command('{} nodejs'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        subprocess.call(
+            self.command_as_list(["echo", """"prefix = test" > ~/.npmrc"""])
+        )
+        self.child = spawn_process(self.command("{} nodejs".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        result = subprocess.check_output(self.command_as_list(['cat', '''~/.npmrc''']))
-        self.assertEqual(result.rstrip().decode(), 'prefix = test')
+        result = subprocess.check_output(self.command_as_list(["cat", """~/.npmrc"""]))
+        self.assertEqual(result.rstrip().decode(), "prefix = test")
 
     def test_existing_npmrc(self):
-        subprocess.call(self.command_as_list(['echo', '''"test = 123" > ~/.npmrc''']))
-        self.child = spawn_process(self.command('{} nodejs'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        subprocess.call(self.command_as_list(["echo", """"test = 123" > ~/.npmrc"""]))
+        self.child = spawn_process(self.command("{} nodejs".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
         result = subprocess.check_output(self.command_as_list(["cat", "~/.npmrc"]))
-        self.assertEqual(result.rstrip().decode(), 'test = 123\r\nprefix = ${HOME}/.npm_modules')
+        self.assertEqual(
+            result.rstrip().decode(), "test = 123\r\nprefix = ${HOME}/.npm_modules"
+        )

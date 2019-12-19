@@ -24,16 +24,20 @@ import umake.frameworks
 
 
 class OneFrameworkCategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
-        super().__init__(name="One framework category", description="Category with one framework")
+        super().__init__(
+            name="One framework category", description="Category with one framework"
+        )
 
 
 class FrameworkA(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework A", description="Description for framework A",
-                         install_path_dir="custom/frameworka", **kwargs)
+        super().__init__(
+            name="Framework A",
+            description="Description for framework A",
+            install_path_dir="custom/frameworka",
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()

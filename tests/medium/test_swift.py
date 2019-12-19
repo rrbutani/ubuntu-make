@@ -30,15 +30,18 @@ class SwiftInContainer(ContainerTests, test_swift.SwiftTests):
 
     def setUp(self):
         self.hosts = {443: ["swift.org"]}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'swift')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "swift")
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "swift", "swift-lang")
+        self.installed_path = os.path.join(
+            self.install_base_path, "swift", "swift-lang"
+        )
 
     def test_install_with_changed_download_page(self):
         """Installing swift ide should fail if download page has significantly changed"""
-        download_page_file_path = os.path.join(get_data_dir(), "server-content", "swift.org", "download",
-                                               "index.html")
-        umake_command = self.command('{} swift'.format(UMAKE))
+        download_page_file_path = os.path.join(
+            get_data_dir(), "server-content", "swift.org", "download", "index.html"
+        )
+        umake_command = self.command("{} swift".format(UMAKE))
         self.bad_download_page_test(umake_command, download_page_file_path)
         self.assertFalse(self.is_in_path(self.exec_path))

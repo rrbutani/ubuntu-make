@@ -31,11 +31,10 @@ from umake.tools import create_launcher, get_application_desktop_file, ChecksumT
 
 logger = logging.getLogger(__name__)
 
-_supported_archs = ['i386', 'amd64']
+_supported_archs = ["i386", "amd64"]
 
 
 class BaseCategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
         super().__init__(name="Base", description=_("Base category"), logo_path=None)
 
@@ -44,7 +43,7 @@ class BaseCategory(umake.frameworks.BaseCategory):
         if line.startswith(tag):
             in_license = True
         if in_license:
-            if line.startswith('</div>'):
+            if line.startswith("</div>"):
                 in_license = False
             else:
                 license_txt.write(line)
@@ -59,7 +58,7 @@ class BaseCategory(umake.frameworks.BaseCategory):
             p = re.search(r'href="(.*)"', line)
             with suppress(AttributeError):
                 url = p.group(1)
-            p = re.search(r'<td>(\w+)</td>', line)
+            p = re.search(r"<td>(\w+)</td>", line)
             with suppress(AttributeError):
                 # ensure the size can match a md5 or sha1 checksum
                 if len(p.group(1)) > 15:
@@ -73,20 +72,25 @@ class BaseCategory(umake.frameworks.BaseCategory):
 
 
 class BaseFramework(umake.frameworks.baseinstaller.BaseInstaller):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Base Framework", description=_("Base Framework (default)"), is_category_default=True,
-                         only_on_archs=_supported_archs, expect_license=True,
-                         packages_requirements=["jayatana"],
-                         download_page="http://localhost:8765/index.html",
-                         checksum_type=ChecksumType.sha1,
-                         dir_to_decompress_in_tarball="base-framework-*",
-                         desktop_filename="base-framework.desktop",
-                         required_files_path=[os.path.join("bin", "studio.sh")], **kwargs)
+        super().__init__(
+            name="Base Framework",
+            description=_("Base Framework (default)"),
+            is_category_default=True,
+            only_on_archs=_supported_archs,
+            expect_license=True,
+            packages_requirements=["jayatana"],
+            download_page="http://localhost:8765/index.html",
+            checksum_type=ChecksumType.sha1,
+            dir_to_decompress_in_tarball="base-framework-*",
+            desktop_filename="base-framework.desktop",
+            required_files_path=[os.path.join("bin", "studio.sh")],
+            **kwargs
+        )
 
         arch = platform.machine()
         self.tag = 'id="linux-bundle64"'
-        if arch == 'i686':
+        if arch == "i686":
             self.tag = 'id="linux-bundle32"'
 
     def parse_license(self, line, license_txt, in_license):
@@ -94,7 +98,7 @@ class BaseFramework(umake.frameworks.baseinstaller.BaseInstaller):
         if line.startswith('<p class="sdk-terms-intro">'):
             in_license = True
         if in_license:
-            if line.startswith('</div>'):
+            if line.startswith("</div>"):
                 in_license = False
             else:
                 license_txt.write(line)
@@ -109,7 +113,7 @@ class BaseFramework(umake.frameworks.baseinstaller.BaseInstaller):
             p = re.search(r'href="(.*)"', line)
             with suppress(AttributeError):
                 url = p.group(1)
-            p = re.search(r'<td>(\w+)</td>', line)
+            p = re.search(r"<td>(\w+)</td>", line)
             with suppress(AttributeError):
                 # ensure the size can match a md5 or sha1 checksum
                 if len(p.group(1)) > 15:
@@ -123,10 +127,15 @@ class BaseFramework(umake.frameworks.baseinstaller.BaseInstaller):
 
     def post_install(self):
         """Create the launcher"""
-        create_launcher(self.desktop_filename, get_application_desktop_file(name=_("Base Framework"),
-                        icon_path=os.path.join(self.install_path, "bin", "studio.png"),
-                        try_exec=os.path.join(self.install_path, "bin", "studio.sh"),
-                        exec=self.exec_link_name,
-                        comment=_("Base Framework developer environment"),
-                        categories="Development;IDE;",
-                        extra="StartupWMClass=jetbrains-base-framework"))
+        create_launcher(
+            self.desktop_filename,
+            get_application_desktop_file(
+                name=_("Base Framework"),
+                icon_path=os.path.join(self.install_path, "bin", "studio.png"),
+                try_exec=os.path.join(self.install_path, "bin", "studio.sh"),
+                exec=self.exec_link_name,
+                comment=_("Base Framework developer environment"),
+                categories="Development;IDE;",
+                extra="StartupWMClass=jetbrains-base-framework",
+            ),
+        )

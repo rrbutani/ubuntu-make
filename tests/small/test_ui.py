@@ -53,13 +53,13 @@ class TestUI(LoggedTestCase):
         timeout_time = time() + 5
         while not self.mainloop_object.mainloop.is_running():
             if time() > timeout_time:
-                raise(BaseException("Mainloop not started in 5 seconds"))
+                raise (BaseException("Mainloop not started in 5 seconds"))
 
     def wait_for_mainloop_shutdown(self):
         timeout_time = time() + 5
         while self.mainloop_object.mainloop.is_running():
             if time() > timeout_time:
-                raise(BaseException("Mainloop not stopped in 5 seconds"))
+                raise (BaseException("Mainloop not stopped in 5 seconds"))
 
     def get_mainloop_thread(self):
         self.mainloop_thread = threading.current_thread().ident
@@ -102,6 +102,7 @@ class TestUI(LoggedTestCase):
     @patch("umake.tools.sys")
     def test_call_display_other_thread(self, mocksys):
         """We call the display method on UIPlug in the main thread from another thread"""
+
         def run_display(future):
             self.function_thread = threading.current_thread().ident
             UI.display(self.contentType)

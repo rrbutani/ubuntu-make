@@ -37,7 +37,9 @@ class TestVersionHandler(LoggedTestCase):
         self.version_dir = tempfile.mkdtemp()
         self.initial_env = os.environ.copy()
         self.initial_os_path_join = os.path.join
-        os.environ["PATH"] = "{}:{}".format(os.path.join(get_data_dir(), "mocks"), os.getenv("PATH"))
+        os.environ["PATH"] = "{}:{}".format(
+            os.path.join(get_data_dir(), "mocks"), os.getenv("PATH")
+        )
         self.version_file_path = os.path.join(self.version_dir, "version")
         open(self.version_file_path, "w").write("42.02")
 
@@ -53,7 +55,7 @@ class TestVersionHandler(LoggedTestCase):
         super().tearDown()
 
     def return_fake_version_path(self, *args):
-        '''Only return fake version path if the request was for that one'''
+        """Only return fake version path if the request was for that one"""
         if args[-1] == "version":
             return self.version_file_path
         return self.initial_os_path_join(*args)
@@ -87,7 +89,9 @@ class TestVersionHandler(LoggedTestCase):
         """Ensure we are returning last known version + unknown if git fails"""
         settings.from_dev = True
         path_join_result.side_effect = self.return_fake_version_path
-        os.environ["PATH"] = "{}:{}".format(os.path.join(get_data_dir(), "mocks", "fails"), os.getenv("PATH"))
+        os.environ["PATH"] = "{}:{}".format(
+            os.path.join(get_data_dir(), "mocks", "fails"), os.getenv("PATH")
+        )
         self.assertEquals(settings.get_version(), "42.02+unknown")
 
     @patch("os.path.join")

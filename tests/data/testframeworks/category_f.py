@@ -24,16 +24,20 @@ import umake.frameworks
 
 
 class CategoryF(umake.frameworks.BaseCategory):
-
     def __init__(self):
-        super().__init__(name="Category F", description="Category F to test installed state")
+        super().__init__(
+            name="Category F", description="Category F to test installed state"
+        )
 
 
 class FrameworkA(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework A", description="Description for framework A (impossible path)",
-                         install_path_dir="/foo/bar/baz", **kwargs)
+        super().__init__(
+            name="Framework A",
+            description="Description for framework A (impossible path)",
+            install_path_dir="/foo/bar/baz",
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()
@@ -43,11 +47,14 @@ class FrameworkA(umake.frameworks.BaseFramework):
 
 
 class FrameworkB(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework B", description="Description for framework B (good install dir, "
-                                                         "no package req)",
-                         install_path_dir="/", **kwargs)
+        super().__init__(
+            name="Framework B",
+            description="Description for framework B (good install dir, "
+            "no package req)",
+            install_path_dir="/",
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()
@@ -57,10 +64,14 @@ class FrameworkB(umake.frameworks.BaseFramework):
 
 
 class FrameworkC(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework C", description="Description for framework C (good install dir, package req.)",
-                         install_path_dir="/", packages_requirements=["foo", "bar"], **kwargs)
+        super().__init__(
+            name="Framework C",
+            description="Description for framework C (good install dir, package req.)",
+            install_path_dir="/",
+            packages_requirements=["foo", "bar"],
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()

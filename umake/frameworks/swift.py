@@ -38,29 +38,30 @@ logger = logging.getLogger(__name__)
 
 
 class SwiftCategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
-        super().__init__(name="Swift", description=_("Swift language"),
-                         logo_path=None)
+        super().__init__(name="Swift", description=_("Swift language"), logo_path=None)
 
 
 class SwiftLang(umake.frameworks.baseinstaller.BaseInstaller):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Swift Lang", description=_("Swift compiler (default)"), is_category_default=True,
-                         packages_requirements=["clang", "libicu-dev"],
-                         only_on_archs=['amd64'],
-                         only_ubuntu=True,
-                         download_page="https://swift.org/download/",
-                         dir_to_decompress_in_tarball="swift*",
-                         required_files_path=[os.path.join("usr", "bin", "swift")],
-                         **kwargs)
+        super().__init__(
+            name="Swift Lang",
+            description=_("Swift compiler (default)"),
+            is_category_default=True,
+            packages_requirements=["clang", "libicu-dev"],
+            only_on_archs=["amd64"],
+            only_ubuntu=True,
+            download_page="https://swift.org/download/",
+            dir_to_decompress_in_tarball="swift*",
+            required_files_path=[os.path.join("usr", "bin", "swift")],
+            **kwargs
+        )
         self.asc_url = "https://swift.org/keys/all-keys.asc"
 
     def parse_download_link(self, line, in_download):
         """Parse Swift download link, expect to find a .sig file"""
         sig_url = None
-        if '.tar.gz.sig' in line:
+        if ".tar.gz.sig" in line:
             in_download = True
         if in_download:
             p = re.search(r'href="(.*)" title="PGP Signature"', line)
@@ -76,16 +77,22 @@ class SwiftLang(umake.frameworks.baseinstaller.BaseInstaller):
 
         error_msg = result[self.download_page].error
         if error_msg:
-            logger.error("An error occurred while downloading {}: {}".format(self.download_page, error_msg))
+            logger.error(
+                "An error occurred while downloading {}: {}".format(
+                    self.download_page, error_msg
+                )
+            )
             UI.return_main_screen(status_code=1)
         in_download = False
         sig_url = None
         for line in result[self.download_page].buffer:
             line_content = line.decode()
-            (new_sig_url, in_download) = self.parse_download_link(line_content, in_download)
+            (new_sig_url, in_download) = self.parse_download_link(
+                line_content, in_download
+            )
             if str(new_sig_url) > str(sig_url):
                 # Avoid fetching development snapshots
-                if 'DEVELOPMENT-SNAPSHOT' not in new_sig_url:
+                if "DEVELOPMENT-SNAPSHOT" not in new_sig_url:
                     tmp_release = re.search("ubuntu(.....).tar", new_sig_url).group(1)
                     if tmp_release <= get_current_distro_version():
                         sig_url = new_sig_url
@@ -93,8 +100,11 @@ class SwiftLang(umake.frameworks.baseinstaller.BaseInstaller):
             logger.error("Download page changed its syntax or is not parsable")
             UI.return_main_screen(status_code=1)
 
-        DownloadCenter(urls=[DownloadItem(sig_url, None), DownloadItem(self.asc_url, None)],
-                       on_done=self.check_gpg_and_start_download, download=False)
+        DownloadCenter(
+            urls=[DownloadItem(sig_url, None), DownloadItem(self.asc_url, None)],
+            on_done=self.check_gpg_and_start_download,
+            download=False,
+        )
 
     def _check_gpg_signature(self, gnupgdir, asc_content, sig):
         """check gpg signature (temporary stock in dir)"""
@@ -110,10 +120,12 @@ class SwiftLang(umake.frameworks.baseinstaller.BaseInstaller):
 
     @MainLoop.in_mainloop_thread
     def check_gpg_and_start_download(self, download_result):
-        asc_content = download_result.pop(self.asc_url).buffer.getvalue().decode('utf-8')
+        asc_content = (
+            download_result.pop(self.asc_url).buffer.getvalue().decode("utf-8")
+        )
         sig_url = list(download_result.keys())[0]
         res = download_result[sig_url]
-        sig = res.buffer.getvalue().decode('utf-8').split()[0]
+        sig = res.buffer.getvalue().decode("utf-8").split()[0]
 
         # When we install new packages, we are executing as root and then dropping
         # as the user for extracting and such. However, for signature verification,
@@ -134,9 +146,11 @@ class SwiftLang(umake.frameworks.baseinstaller.BaseInstaller):
                 self._check_gpg_signature(tmpdirname, asc_content, sig)
 
         # you get and store self.download_url
-        url = re.sub('.sig', '', sig_url)
+        url = re.sub(".sig", "", sig_url)
         if url is None:
-            logger.error("Download page changed its syntax or is not parsable (missing url)")
+            logger.error(
+                "Download page changed its syntax or is not parsable (missing url)"
+            )
             UI.return_main_screen(status_code=1)
         logger.debug("Found download link for {}".format(url))
         self.download_requests.append(DownloadItem(url, None))
@@ -144,5 +158,8 @@ class SwiftLang(umake.frameworks.baseinstaller.BaseInstaller):
 
     def post_install(self):
         """Add swift necessary env variables"""
-        add_env_to_user(self.name, {"PATH": {"value": os.path.join(self.install_path, "usr", "bin")}})
+        add_env_to_user(
+            self.name,
+            {"PATH": {"value": os.path.join(self.install_path, "usr", "bin")}},
+        )
         UI.delayed_display(DisplayMessage(self.RELOGIN_REQUIRE_MSG.format(self.name)))

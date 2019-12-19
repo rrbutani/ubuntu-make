@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 # server loads the server.pem
 # put the .crt file in /usr/local/share/ca-certificates and run sudo update-ca-certificates
 
+
 class LocalHttp:
     """Local threaded http server. will be serving path content"""
 
@@ -70,7 +71,9 @@ class LocalHttp:
                 self.ssl_contexts[hostname] = context
                 if not context_associated:
                     context_associated = True
-                    self.httpd.socket = context.wrap_socket(self.httpd.socket, server_side=True)
+                    self.httpd.socket = context.wrap_socket(
+                        self.httpd.socket, server_side=True
+                    )
                     context.set_servername_callback(self._match_sni_context)
 
         executor = futures.ThreadPoolExecutor(max_workers=1)
@@ -82,18 +85,24 @@ class LocalHttp:
         try:
             ssl_sock.context = self.ssl_contexts[server_name]
         except KeyError:
-            logger.warning("Didn't find corresponding context on this server for {}, keeping default"
-                           .format(server_name))
+            logger.warning(
+                "Didn't find corresponding context on this server for {}, keeping default".format(
+                    server_name
+                )
+            )
 
     def _serve(self):
-        logger.info("Serving locally from {} on {}".format(self.path, self.get_address()))
+        logger.info(
+            "Serving locally from {} on {}".format(self.path, self.get_address())
+        )
         self.httpd.serve_forever()
 
     def get_address(self, localhost=False):
         """Get public address"""
-        server_name = 'localhost' if localhost else self.httpd.server_name
-        return "http{}://{}:{}".format("s" if self.use_ssl else "",
-                                       server_name, self.port)
+        server_name = "localhost" if localhost else self.httpd.server_name
+        return "http{}://{}:{}".format(
+            "s" if self.use_ssl else "", server_name, self.port
+        )
 
     def stop(self):
         """Stop local server"""
@@ -132,7 +141,9 @@ class RequestHandler(SimpleHTTPRequestHandler):
         # Need to strip the leading '/' so the join will actually work.
         current_root_path = RequestHandler.root_path
         if RequestHandler.multi_hosts:
-            current_root_path = os.path.join(RequestHandler.root_path, self.headers["Host"].split(":")[0])
+            current_root_path = os.path.join(
+                RequestHandler.root_path, self.headers["Host"].split(":")[0]
+            )
 
         file_path = posixpath.normpath(urllib.parse.unquote(path))[1:]
         file_path = os.path.join(current_root_path, file_path)
@@ -140,13 +151,13 @@ class RequestHandler(SimpleHTTPRequestHandler):
             return file_path
 
         # abandon query parameters
-        path = path.split('?', 1)[0]
-        path = path.split('#', 1)[0]
-        path = path.split('&', 1)[0]
+        path = path.split("?", 1)[0]
+        path = path.split("#", 1)[0]
+        path = path.split("&", 1)[0]
         # Don't forget explicit trailing slash when normalizing. Issue17324
-        trailing_slash = path.rstrip().endswith('/')
+        trailing_slash = path.rstrip().endswith("/")
         path = posixpath.normpath(urllib.parse.unquote(path))
-        words = path.split('/')
+        words = path.split("/")
         words = filter(None, words)
 
         # root path isn't cwd but the one we specified and translated
@@ -159,22 +170,22 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 continue
             path = os.path.join(path, word)
         if trailing_slash:
-            path += '/'
+            path += "/"
         return path
 
     def do_GET(self):
         """Override this to enable redirecting paths that end in -redirect or rewrite in presence of ?file="""
-        cookies = http.cookies.SimpleCookie(self.headers['Cookie'])
-        if 'int' in cookies:
-            cookies['int'] = int(cookies['int'].value) + 1
+        cookies = http.cookies.SimpleCookie(self.headers["Cookie"])
+        if "int" in cookies:
+            cookies["int"] = int(cookies["int"].value) + 1
         for cookie in cookies.values():
-            self.headers_to_send.append(('Set-Cookie', cookie.OutputString(None)))
+            self.headers_to_send.append(("Set-Cookie", cookie.OutputString(None)))
 
-        if self.path.endswith('-redirect'):
+        if self.path.endswith("-redirect"):
             self.send_response(302)
-            self.send_header('Location', self.path[:-len('-redirect')])
+            self.send_header("Location", self.path[: -len("-redirect")])
             self.end_headers()
-        elif 'setheaders' in self.path:
+        elif "setheaders" in self.path:
             # For paths that end with '-setheaders', we fish out the headers from the query
             # params and set them.
             url = urllib.parse.urlparse(self.path)
@@ -183,9 +194,9 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 for value in values:
                     self.headers_to_send.append((key, value))
             # Now we need to chop off the '-setheaders' part.
-            self.path = url.path[:-len('-setheaders')]
+            self.path = url.path[: -len("-setheaders")]
             super().do_GET()
-        elif 'headers' in self.path:
+        elif "headers" in self.path:
             # For paths that end with '-headers', we check if the request actually
             # contains the header with the specified value. The expected header key
             # and value are in the query params.
@@ -195,24 +206,26 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 if self.headers[key] != params[key][0]:
                     self.send_error(404)
             # Now we need to chop off the '-headers' part.
-            self.path = url.path[:-len('-headers')]
+            self.path = url.path[: -len("-headers")]
             super().do_GET()
         else:
             # keep special ?file= to redirect the query
-            if '?file=' in self.path:
+            if "?file=" in self.path:
                 # Eclipse frameworks:
                 # Redirect the checksum to the old path to keep different filenames
                 # on the mock server.
-                if '/downloads/sums.php?file=' in self.path:
-                    self.path += '.sha512'
-                self.path = self.path.split('?file=', 1)[1]
-                self.path = self.path.replace('&', '?', 1)  # Replace the first & with ? to make it valid.
+                if "/downloads/sums.php?file=" in self.path:
+                    self.path += ".sha512"
+                self.path = self.path.split("?file=", 1)[1]
+                self.path = self.path.replace(
+                    "&", "?", 1
+                )  # Replace the first & with ? to make it valid.
             if RequestHandler.ftp_redir:
                 self.send_response(302)
                 # We need to remove the query parameters, so we actually parse the URL.
                 parsed_url = urllib.parse.urlparse(self.path)
-                new_loc = 'ftp://' + RequestHandler.hostname + parsed_url.path
-                self.send_header('Location', new_loc)
+                new_loc = "ftp://" + RequestHandler.hostname + parsed_url.path
+                self.send_header("Location", new_loc)
                 self.end_headers()
                 return
             super().do_GET()
@@ -223,7 +236,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
         override from SimpleHTTPRequestHandler to not output to stderr but log in the logging system
         """
 
-        logger.debug("%s - - [%s] %s\n" %
-                     (self.address_string(),
-                      self.log_date_time_string(),
-                      fmt % args))
+        logger.debug(
+            "%s - - [%s] %s\n"
+            % (self.address_string(), self.log_date_time_string(), fmt % args)
+        )

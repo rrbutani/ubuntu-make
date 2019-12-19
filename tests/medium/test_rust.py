@@ -30,7 +30,9 @@ from ..tools import get_data_dir, UMAKE
 class RustInContainer(ContainerTests, test_rust.RustTests):
     """This will test the Rust integration inside a container"""
 
-    TEST_CHECKSUM_RUST_DATA = "2a0db6efe370a900491d9e9db13e53ffd00b01dcd8458486f9f3fc3177f96af3"
+    TEST_CHECKSUM_RUST_DATA = (
+        "2a0db6efe370a900491d9e9db13e53ffd00b01dcd8458486f9f3fc3177f96af3"
+    )
 
     def setUp(self):
         self.hosts = {443: ["www.rust-lang.org", "static.rust-lang.org"]}
@@ -40,8 +42,13 @@ class RustInContainer(ContainerTests, test_rust.RustTests):
 
     def test_install_with_changed_download_reference_page(self):
         """Installing Rust should fail if download reference page has significantly changed"""
-        download_page_file_path = os.path.join(get_data_dir(), "server-content", "www.rust-lang.org",
-                                               "en-US", "other-installers.html")
-        umake_command = self.command('{} rust'.format(UMAKE))
+        download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "www.rust-lang.org",
+            "en-US",
+            "other-installers.html",
+        )
+        umake_command = self.command("{} rust".format(UMAKE))
         self.bad_download_page_test(umake_command, download_page_file_path)
         self.assertFalse(self.path_exists(self.exec_path))

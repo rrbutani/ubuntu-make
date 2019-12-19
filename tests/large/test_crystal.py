@@ -34,7 +34,9 @@ class CrystalTests(LargeFrameworkTests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "crystal", "crystal-lang")
+        self.installed_path = os.path.join(
+            self.install_base_path, "crystal", "crystal-lang"
+        )
         self.framework_name_for_profile = "Crystal Lang"
 
     @property
@@ -48,21 +50,34 @@ class CrystalTests(LargeFrameworkTests):
             self.additional_dirs.append(self.example_prog_dir)
             example_file = os.path.join(self.example_prog_dir, "hello.cr")
             open(example_file, "w").write(self.EXAMPLE_PROJECT)
-            compile_command = ["bash", "-l", "-c", "crystal run {}".format(example_file)]
+            compile_command = [
+                "bash",
+                "-l",
+                "-c",
+                "crystal run {}".format(example_file),
+            ]
         else:  # our mock expects getting that path
             compile_command = ["bash", "-l", "crystal run /tmp/hello.cr"]
 
-        self.child = spawn_process(self.command('{} crystal'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} crystal".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         self.assert_exec_exists()
         self.assertTrue(self.is_in_path(self.exec_path))
 
         # compile a small project
-        output = subprocess.check_output(self.command_as_list(compile_command)).decode()\
-            .replace('\r', '').replace('\n', '')
+        output = (
+            subprocess.check_output(self.command_as_list(compile_command))
+            .decode()
+            .replace("\r", "")
+            .replace("\n", "")
+        )
 
         self.assertEqual(output, "Hello world!")

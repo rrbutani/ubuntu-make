@@ -34,27 +34,25 @@ logger = logging.getLogger(__name__)
 
 
 class GoCategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
-        super().__init__(name="Go", description=_("Go language"),
-                         logo_path=None)
+        super().__init__(name="Go", description=_("Go language"), logo_path=None)
 
 
 class GoLang(umake.frameworks.baseinstaller.BaseInstaller):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Go Lang", description=_("Google compiler (default)"), is_category_default=True,
-                         only_on_archs=['i386', 'amd64', 'ppc64el', 's390x'],
-                         download_page="https://golang.org/dl/",
-                         checksum_type=ChecksumType.sha256,
-                         dir_to_decompress_in_tarball="go",
-                         required_files_path=[os.path.join("bin", "go")],
-                         **kwargs)
+        super().__init__(
+            name="Go Lang",
+            description=_("Google compiler (default)"),
+            is_category_default=True,
+            only_on_archs=["i386", "amd64", "ppc64el", "s390x"],
+            download_page="https://golang.org/dl/",
+            checksum_type=ChecksumType.sha256,
+            dir_to_decompress_in_tarball="go",
+            required_files_path=[os.path.join("bin", "go")],
+            **kwargs
+        )
 
-    arch_trans = {
-        "i386": "386",
-        "ppc64el": "ppc64le"
-    }
+    arch_trans = {"i386": "386", "ppc64el": "ppc64le"}
 
     def get_framework_arch(self):
         arch = get_current_arch()
@@ -71,7 +69,7 @@ class GoLang(umake.frameworks.baseinstaller.BaseInstaller):
             p = re.search(r'href="(.*)">', line)
             with suppress(AttributeError):
                 url = p.group(1)
-            p = re.search(r'<td><tt>(\w+)</tt></td>', line)
+            p = re.search(r"<td><tt>(\w+)</tt></td>", line)
             with suppress(AttributeError):
                 sha = p.group(1)
             if "</tr>" in line:
@@ -83,6 +81,11 @@ class GoLang(umake.frameworks.baseinstaller.BaseInstaller):
 
     def post_install(self):
         """Add go necessary env variables"""
-        add_env_to_user(self.name, {"PATH": {"value": os.path.join(self.install_path, "bin")},
-                                    "GOROOT": {"value": self.install_path, "keep": False}})
+        add_env_to_user(
+            self.name,
+            {
+                "PATH": {"value": os.path.join(self.install_path, "bin")},
+                "GOROOT": {"value": self.install_path, "keep": False},
+            },
+        )
         UI.delayed_display(DisplayMessage(self.RELOGIN_REQUIRE_MSG.format(self.name)))

@@ -35,7 +35,9 @@ class SwiftTests(LargeFrameworkTests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "swift", "swift-lang")
+        self.installed_path = os.path.join(
+            self.install_base_path, "swift", "swift-lang"
+        )
         self.framework_name_for_profile = "Swift Lang"
 
     @property
@@ -54,17 +56,25 @@ class SwiftTests(LargeFrameworkTests):
             self.example_prog_dir = "/tmp"
             compile_command = ["bash", "-l", "swift /tmp/main.swift"]
 
-        self.child = spawn_process(self.command('{} swift'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} swift".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         self.assert_exec_exists()
         self.assertTrue(self.is_in_path(self.exec_path))
 
         # run the compiled result
-        output = subprocess.check_output(self.command_as_list(compile_command)).decode()\
-            .replace('\r', '').replace('\n', '')
+        output = (
+            subprocess.check_output(self.command_as_list(compile_command))
+            .decode()
+            .replace("\r", "")
+            .replace("\n", "")
+        )
 
         self.assertEqual(output, "Hello, world!")

@@ -37,16 +37,18 @@ logger = logging.getLogger(__name__)
 # user encoding is and python3 will fallback to ANSI_X3.4-1968, which isn't UTF-8 and creates
 # thus UnicodeEncodeError)
 try:
-    locale.setlocale(locale.LC_ALL, '')
+    locale.setlocale(locale.LC_ALL, "")
     gettext.textdomain("ubuntu-make")
 except locale.Error:
-    logger.debug("Couldn't load default locale {}, fallback to English".format(locale.LC_ALL))
+    logger.debug(
+        "Couldn't load default locale {}, fallback to English".format(locale.LC_ALL)
+    )
 
 _default_log_level = logging.WARNING
 _datadir = None
 
 
-def _setup_logging(env_key='LOG_CFG', level=_default_log_level):
+def _setup_logging(env_key="LOG_CFG", level=_default_log_level):
     """Setup logging configuration
 
     Order of preference:
@@ -54,11 +56,12 @@ def _setup_logging(env_key='LOG_CFG', level=_default_log_level):
     - env_key env variable if set (logging config file)
     - fallback to _default_log_level
     """
-    path = os.getenv(env_key, '')
+    path = os.getenv(env_key, "")
     logging.basicConfig(level=level, format="%(levelname)s: %(message)s")
     if level == logging.DEBUG:
         logger.debug("Set http/requests logger to debug")
         import http.client as http_client
+
         http_client.HTTPConnection.debuglevel = 1
 
         requests_log = logging.getLogger("requests.packages.urllib3")
@@ -66,10 +69,14 @@ def _setup_logging(env_key='LOG_CFG', level=_default_log_level):
         requests_log.propagate = True
     if level == _default_log_level:
         if os.path.exists(path):
-            with open(path, 'rt') as f:
+            with open(path, "rt") as f:
                 config = yaml.load(f.read())
             logging.config.dictConfig(config)
-    logging.info("Logging level set to {}".format(logging.getLevelName(logging.root.getEffectiveLevel())))
+    logging.info(
+        "Logging level set to {}".format(
+            logging.getLevelName(logging.root.getEffectiveLevel())
+        )
+    )
 
 
 def set_logging_from_args(args, parser):
@@ -78,7 +85,7 @@ def set_logging_from_args(args, parser):
     for arg in args:
         if arg.startswith("-v"):
             for char in arg:
-                if char not in ['-', 'v']:
+                if char not in ["-", "v"]:
                     break
             else:
                 result_verbosity_arg.append(arg)
@@ -103,13 +110,14 @@ def should_load_all_frameworks(args):
 
 
 class _HelpAction(argparse._HelpAction):
-
     def __call__(self, parser, namespace, values, option_string=None):
         parser.print_help()
         # retrieve subparsers from parser
         subparsers_actions = [
-            action for action in parser._actions
-            if isinstance(action, argparse._SubParsersAction)]
+            action
+            for action in parser._actions
+            if isinstance(action, argparse._SubParsersAction)
+        ]
         for subparsers_action in subparsers_actions:
             # get all subparsers and print help
             for choice, subparser in subparsers_action.choices.items():
@@ -122,24 +130,55 @@ def main():
     """Main entry point of the program"""
 
     if "udtc" in sys.argv[0]:
-        print(_("WARNING: 'udtc' command is the previous name of Ubuntu Make. Please use the 'umake' command from now "
-                "on providing the exact same features. The 'udtc' command will be removed soon."))
+        print(
+            _(
+                "WARNING: 'udtc' command is the previous name of Ubuntu Make. Please use the 'umake' command from now "
+                "on providing the exact same features. The 'udtc' command will be removed soon."
+            )
+        )
 
-    parser = argparse.ArgumentParser(description=_("Deploy and setup developers environment easily on ubuntu"),
-                                     epilog=_("Note that you can also configure different debug logging behavior using "
-                                              "LOG_CFG that points to a log yaml profile."),
-                                     add_help=False)
-    parser.add_argument('--help', action=_HelpAction, help=_('Show this help'))  # add custom help
-    parser.add_argument("-v", "--verbose", action="count", default=0, help=_("Increase output verbosity (2 levels)"))
+    parser = argparse.ArgumentParser(
+        description=_("Deploy and setup developers environment easily on ubuntu"),
+        epilog=_(
+            "Note that you can also configure different debug logging behavior using "
+            "LOG_CFG that points to a log yaml profile."
+        ),
+        add_help=False,
+    )
+    parser.add_argument(
+        "--help", action=_HelpAction, help=_("Show this help")
+    )  # add custom help
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help=_("Increase output verbosity (2 levels)"),
+    )
 
-    parser.add_argument('-r', '--remove', action="store_true", help=_("Remove specified framework if installed"))
+    parser.add_argument(
+        "-r",
+        "--remove",
+        action="store_true",
+        help=_("Remove specified framework if installed"),
+    )
 
-    list_group = parser.add_argument_group("List frameworks").add_mutually_exclusive_group()
-    list_group.add_argument('-l', '--list', action="store_true", help=_("List all frameworks"))
-    list_group.add_argument('--list-installed', action="store_true", help=_("List installed frameworks"))
-    list_group.add_argument('--list-available', action="store_true", help=_("List installable frameworks"))
+    list_group = parser.add_argument_group(
+        "List frameworks"
+    ).add_mutually_exclusive_group()
+    list_group.add_argument(
+        "-l", "--list", action="store_true", help=_("List all frameworks")
+    )
+    list_group.add_argument(
+        "--list-installed", action="store_true", help=_("List installed frameworks")
+    )
+    list_group.add_argument(
+        "--list-available", action="store_true", help=_("List installable frameworks")
+    )
 
-    parser.add_argument('--version', action="store_true", help=_("Print version and exit"))
+    parser.add_argument(
+        "--version", action="store_true", help=_("Print version and exit")
+    )
 
     # set logging ignoring unknown options
     set_logging_from_args(sys.argv, parser)

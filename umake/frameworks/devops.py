@@ -32,32 +32,38 @@ import umake.frameworks.baseinstaller
 from umake.interactions import Choice, TextWithChoices, DisplayMessage
 from umake.network.download_center import DownloadItem
 from umake.ui import UI
-from umake.tools import create_launcher, get_application_desktop_file, MainLoop,\
-    get_current_arch, add_env_to_user
+from umake.tools import (
+    create_launcher,
+    get_application_desktop_file,
+    MainLoop,
+    get_current_arch,
+    add_env_to_user,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class DevopsCategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
-        super().__init__(name="devops", description=_("Devops Environment"), logo_path=None)
+        super().__init__(
+            name="devops", description=_("Devops Environment"), logo_path=None
+        )
 
 
 class Terraform(umake.frameworks.baseinstaller.BaseInstaller):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Terraform", description=_("Infrastructure-as-code tool"),
-                         only_on_archs=['i386', 'amd64'],
-                         download_page="https://api.github.com/repos/hashicorp/terraform/releases/latest",
-                         dir_to_decompress_in_tarball=".",
-                         required_files_path=["terraform"],
-                         json=True, **kwargs)
+        super().__init__(
+            name="Terraform",
+            description=_("Infrastructure-as-code tool"),
+            only_on_archs=["i386", "amd64"],
+            download_page="https://api.github.com/repos/hashicorp/terraform/releases/latest",
+            dir_to_decompress_in_tarball=".",
+            required_files_path=["terraform"],
+            json=True,
+            **kwargs
+        )
 
-    arch_trans = {
-        "amd64": "amd64",
-        "i386": "386"
-    }
+    arch_trans = {"amd64": "amd64", "i386": "386"}
 
     def parse_download_link(self, line, in_download):
         """Parse Terraform download links"""
@@ -67,7 +73,8 @@ class Terraform(umake.frameworks.baseinstaller.BaseInstaller):
             version = tag_name[1:]
             arch = self.arch_trans[get_current_arch()]
             url = "https://releases.hashicorp.com/terraform/{version}/terraform_{version}_linux_{arch}.zip".format(
-                version=version, arch=arch)
+                version=version, arch=arch
+            )
         return url, in_download
 
     def post_install(self):

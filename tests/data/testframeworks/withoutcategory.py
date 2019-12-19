@@ -24,10 +24,13 @@ import umake.frameworks
 
 
 class FrameworkFreeA(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework Free A", description="Description for framework A in no category",
-                         install_path_dir="custom/frameworka", **kwargs)
+        super().__init__(
+            name="Framework Free A",
+            description="Description for framework A in no category",
+            install_path_dir="custom/frameworka",
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()
@@ -37,10 +40,12 @@ class FrameworkFreeA(umake.frameworks.BaseFramework):
 
 
 class FrameworkFreeB(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework Free / B", description="Description for framework B in no category",
-                         **kwargs)
+        super().__init__(
+            name="Framework Free / B",
+            description="Description for framework B in no category",
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()

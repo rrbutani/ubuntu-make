@@ -34,7 +34,9 @@ class NodejsTests(LargeFrameworkTests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "nodejs", "nodejs-lang")
+        self.installed_path = os.path.join(
+            self.install_base_path, "nodejs", "nodejs-lang"
+        )
         self.framework_name_for_profile = "Nodejs Lang"
 
     @property
@@ -54,10 +56,14 @@ class NodejsTests(LargeFrameworkTests):
             compile_command = ["bash", "-l", "node /tmp/hello.js"]
             npm_command = ["bash", "-l", "npm config get prefix"]
 
-        self.child = spawn_process(self.command('{} nodejs'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} nodejs".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         self.assert_exec_exists()
@@ -68,22 +74,41 @@ class NodejsTests(LargeFrameworkTests):
         self.assertTrue(self.is_in_path(npm_path))
 
         # compile a small project
-        output = subprocess.check_output(self.command_as_list(compile_command)).decode()\
-            .replace('\r', '').replace('\n', '')
+        output = (
+            subprocess.check_output(self.command_as_list(compile_command))
+            .decode()
+            .replace("\r", "")
+            .replace("\n", "")
+        )
 
         # set npm prefix
-        npm_output = subprocess.check_output(self.command_as_list(npm_command)).decode()\
-            .replace('\r', '').replace('\n', '')
+        npm_output = (
+            subprocess.check_output(self.command_as_list(npm_command))
+            .decode()
+            .replace("\r", "")
+            .replace("\n", "")
+        )
 
         self.assertEqual(output, "Hello World")
-        self.assertEqual(npm_output, "{}/.npm_modules".format(os.path.join("/",
-                                                              self.installed_path.split('/')[1],
-                                                              self.installed_path.split('/')[2])))
+        self.assertEqual(
+            npm_output,
+            "{}/.npm_modules".format(
+                os.path.join(
+                    "/",
+                    self.installed_path.split("/")[1],
+                    self.installed_path.split("/")[2],
+                )
+            ),
+        )
 
     def test_lts_select_install(self):
         """Install nodejs lts"""
-        self.child = spawn_process(self.command('{} nodejs --lts').format(UMAKE))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} nodejs --lts").format(UMAKE))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()

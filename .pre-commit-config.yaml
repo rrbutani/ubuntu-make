@@ -1,0 +1,17 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: stable
+    hooks:
+      - id: black
+  # - repo: https://github.com/codespell-project/codespell 
+  #   rev: stable
+  #   entry: codespell -S "*.pyc,./tests/data/server-content/*,./confs/*,./debian/*,./po/*,./env/*,.git,*.sh,*.deb,*.tgz,*.zip"
+  - repo: https://github.com/codespell-project/codespell
+    rev: master
+    hooks:
+      - id: codespell
+        name: codespell
+        description: Checks for common misspellings in text files.
+        entry: codespell -S "*.pyc,./tests/data/server-content/*,./confs/*,./debian/*,./po/*,./env/*,.git,*.sh,*.deb,*.tgz,*.zip"
+        language: python
+        types: [text]

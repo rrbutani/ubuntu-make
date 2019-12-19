@@ -24,16 +24,21 @@ import umake.frameworks
 
 
 class DCategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
-        super().__init__(name="Category D", description="Category D description (with restricted frameworks)")
+        super().__init__(
+            name="Category D",
+            description="Category D description (with restricted frameworks)",
+        )
 
 
 class FrameworkA(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework A", description="Description for framework A (restricted arch)",
-                         only_on_archs=["foo", "baz"], **kwargs)
+        super().__init__(
+            name="Framework A",
+            description="Description for framework A (restricted arch)",
+            only_on_archs=["foo", "baz"],
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()
@@ -43,10 +48,13 @@ class FrameworkA(umake.frameworks.BaseFramework):
 
 
 class FrameworkB(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework B", description="Description for framework B (restricted version)",
-                         only_ubuntu_version=["9.10", "10.04"], **kwargs)
+        super().__init__(
+            name="Framework B",
+            description="Description for framework B (restricted version)",
+            only_ubuntu_version=["9.10", "10.04"],
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()
@@ -56,11 +64,14 @@ class FrameworkB(umake.frameworks.BaseFramework):
 
 
 class FrameworkC(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework C", description="Description for framework C (restricted version and arch)",
-                         only_on_archs=["foo", "bar", "baz"],
-                         only_ubuntu_version=["9.10", "10.04", "10.10.10"], **kwargs)
+        super().__init__(
+            name="Framework C",
+            description="Description for framework C (restricted version and arch)",
+            only_on_archs=["foo", "bar", "baz"],
+            only_ubuntu_version=["9.10", "10.04", "10.10.10"],
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()

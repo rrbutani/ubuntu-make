@@ -53,9 +53,11 @@ class DpkgAptSetup(LoggedTestCase):
         self.dpkg = os.path.join(self.chroot_path, "usr", "bin", "dpkg")
         with open(self.dpkg, "w") as f:
             # Don't nest fakeroot calls when having some dpkg hook scripts
-            f.write("#!/bin/sh\nprependfakeroot=''\nif [ -z \"$FAKEROOTKEY\" ]; then\nprependfakeroot=fakeroot\nfi\n "
-                    "$prependfakeroot /usr/bin/dpkg --root={root} --force-not-root --force-bad-path "
-                    "--log={root}/var/log/dpkg.log \"$@\"".format(root=self.chroot_path))
+            f.write(
+                "#!/bin/sh\nprependfakeroot=''\nif [ -z \"$FAKEROOTKEY\" ]; then\nprependfakeroot=fakeroot\nfi\n "
+                "$prependfakeroot /usr/bin/dpkg --root={root} --force-not-root --force-bad-path "
+                '--log={root}/var/log/dpkg.log "$@"'.format(root=self.chroot_path)
+            )
         st = os.stat(self.dpkg)
         os.chmod(self.dpkg, st.st_mode | stat.S_IEXEC)
 
@@ -65,24 +67,26 @@ class DpkgAptSetup(LoggedTestCase):
         manipulate_path_env(os.path.dirname(self.dpkg))
 
         # apt requirements
-        apt_etc = os.path.join(self.chroot_path, 'etc', 'apt')
+        apt_etc = os.path.join(self.chroot_path, "etc", "apt")
         os.makedirs(apt_etc)
-        os.makedirs(os.path.join(self.chroot_path, 'var', 'log', 'apt'))
-        with open(os.path.join(apt_etc, 'sources.list'), 'w') as f:
-            f.write('deb [trusted=yes] file:{} /'.format(self.apt_package_dir))
+        os.makedirs(os.path.join(self.chroot_path, "var", "log", "apt"))
+        with open(os.path.join(apt_etc, "sources.list"), "w") as f:
+            f.write("deb [trusted=yes] file:{} /".format(self.apt_package_dir))
 
         # dpkg requirements
-        dpkg_dir = os.path.join(self.chroot_path, 'var', 'lib', 'dpkg')
+        dpkg_dir = os.path.join(self.chroot_path, "var", "lib", "dpkg")
         os.makedirs(dpkg_dir)
-        os.mkdir(os.path.join(os.path.join(dpkg_dir, 'info')))
-        os.mkdir(os.path.join(os.path.join(dpkg_dir, 'triggers')))
-        os.mkdir(os.path.join(os.path.join(dpkg_dir, 'updates')))
-        open(os.path.join(dpkg_dir, 'status'), 'w').close()
-        open(os.path.join(dpkg_dir, 'available'), 'w').close()
+        os.mkdir(os.path.join(os.path.join(dpkg_dir, "info")))
+        os.mkdir(os.path.join(os.path.join(dpkg_dir, "triggers")))
+        os.mkdir(os.path.join(os.path.join(dpkg_dir, "updates")))
+        open(os.path.join(dpkg_dir, "status"), "w").close()
+        open(os.path.join(dpkg_dir, "available"), "w").close()
         self.dpkg_dir = dpkg_dir
 
         cache = apt.Cache(rootdir=self.chroot_path)
-        apt.apt_pkg.config.set("Dir::Bin::dpkg", self.dpkg)  # must be called after initializing the rootdir cache
+        apt.apt_pkg.config.set(
+            "Dir::Bin::dpkg", self.dpkg
+        )  # must be called after initializing the rootdir cache
         cache.update()
         cache.open()
         if hasattr(self, "handler"):

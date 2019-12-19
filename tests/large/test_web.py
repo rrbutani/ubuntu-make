@@ -55,15 +55,21 @@ class FirefoxDevTests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-        self.check_and_kill_process(["firefox", self.installed_path],
-                                    wait_before=self.TIMEOUT_START, send_sigkill=True)
+        self.check_and_kill_process(
+            ["firefox", self.installed_path],
+            wait_before=self.TIMEOUT_START,
+            send_sigkill=True,
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
-        self.child = spawn_process(self.command('{} web firefox-dev'.format(UMAKE)))
+        self.child = spawn_process(self.command("{} web firefox-dev".format(UMAKE)))
         self.expect_and_no_warn("Firefox Dev is already installed.*\[.*\] ")
         self.child.sendline()
         self.wait_and_close()
@@ -71,49 +77,69 @@ class FirefoxDevTests(LargeFrameworkTests):
     def test_default_install(self):
         """Install firefox dev from scratch test case"""
         install_language = "en-US"
-        self.child = spawn_process(self.command('{} web firefox-dev'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} web firefox-dev".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
         self.expect_and_no_warn("Choose language:")
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
         self.verify_install(install_language)
 
     def test_arg_language_select_install(self):
         """Install firefox dev with language selected by --lang"""
         install_language = "bg"
-        self.child = spawn_process(self.command('{} web firefox-dev --lang={}'.format(UMAKE, install_language)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(
+            self.command("{} web firefox-dev --lang={}".format(UMAKE, install_language))
+        )
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
         self.verify_install(install_language)
 
     def test_interactive_language_select_install(self):
         """Install firefox dev with language selected interactively"""
         install_language = "bg"
-        self.child = spawn_process(self.command('{} web firefox-dev'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} web firefox-dev".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
         self.expect_and_no_warn("Choose language:")
         self.child.sendline(install_language)
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
         self.verify_install(install_language)
 
     def test_unavailable_language_select_install(self):
         """Installing Firefox-dev in unavailable language should be rejected"""
         install_language = "ABCdwXYZ"
-        self.child = spawn_process(self.command('{} web firefox-dev --lang={}'.format(UMAKE, install_language)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(
+            self.command("{} web firefox-dev --lang={}".format(UMAKE, install_language))
+        )
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
         self.wait_and_close(expect_warn=True, exit_status=1)
 
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
 
     def language_file_exists(self, language):
-        return self.path_exists(os.path.join(self.installed_path, "dictionaries", "{}.aff".format(language)))
+        return self.path_exists(
+            os.path.join(self.installed_path, "dictionaries", "{}.aff".format(language))
+        )
 
 
 class PhantomJSTests(LargeFrameworkTests):
@@ -144,17 +170,23 @@ class PhantomJSTests(LargeFrameworkTests):
         else:  # our mock expects getting that path
             compile_command = ["bash", "-l", "phantomjs /tmp/hello.js"]
 
-        self.child = spawn_process(self.command('{} web phantomjs'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} web phantomjs".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         self.assert_exec_exists()
         self.assertTrue(self.is_in_path(self.exec_path))
 
         # compile a small project
-        output = subprocess.check_output(self.command_as_list(compile_command)).decode()[:-1]
+        output = subprocess.check_output(
+            self.command_as_list(compile_command)
+        ).decode()[:-1]
 
         self.assertEqual(output, "hello, world")
 
@@ -169,7 +201,7 @@ class GeckodriverTests(LargeFrameworkTests):
     def setUp(self):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "web", "geckodriver")
-        self.command_args = '{} web geckodriver'.format(UMAKE)
+        self.command_args = "{} web geckodriver".format(UMAKE)
 
     @property
     def exec_path(self):
@@ -177,17 +209,26 @@ class GeckodriverTests(LargeFrameworkTests):
 
     def test_default_install(self):
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         self.assert_exec_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
-        self.check_and_kill_process([self.exec_path], wait_before=self.TIMEOUT_START, send_sigkill=True)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        self.check_and_kill_process(
+            [self.exec_path], wait_before=self.TIMEOUT_START, send_sigkill=True
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
@@ -207,8 +248,10 @@ class ChromedriverTests(LargeFrameworkTests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "web", "chromedriver")
-        self.command_args = '{} web chromedriver'.format(UMAKE)
+        self.installed_path = os.path.join(
+            self.install_base_path, "web", "chromedriver"
+        )
+        self.command_args = "{} web chromedriver".format(UMAKE)
 
     @property
     def exec_path(self):
@@ -216,17 +259,26 @@ class ChromedriverTests(LargeFrameworkTests):
 
     def test_default_install(self):
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         self.assert_exec_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
-        self.check_and_kill_process([self.exec_path], wait_before=self.TIMEOUT_START, send_sigkill=True)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        self.check_and_kill_process(
+            [self.exec_path], wait_before=self.TIMEOUT_START, send_sigkill=True
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:

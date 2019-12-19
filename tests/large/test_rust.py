@@ -51,36 +51,60 @@ class RustTests(LargeFrameworkTests):
             example_file = os.path.join(self.example_prog_dir, "hello.rs")
             open(example_file, "w").write(self.EXAMPLE_PROJECT)
             # rust compile in pwd by default, do not pollute ubuntu make source code
-            compile_command = ["bash", "-l", "-c", "rustc --out-dir {} {}".format(self.example_prog_dir, example_file)]
+            compile_command = [
+                "bash",
+                "-l",
+                "-c",
+                "rustc --out-dir {} {}".format(self.example_prog_dir, example_file),
+            ]
         else:  # our mock expects getting that path
             self.example_prog_dir = "/tmp"
             example_file = os.path.join(self.example_prog_dir, "hello.rs")
             # rust compile in pwd by default, do not pollute ubuntu make source code
-            compile_command = ["bash", "-l", "rustc --out-dir {} {}".format(self.example_prog_dir, example_file)]
+            compile_command = [
+                "bash",
+                "-l",
+                "rustc --out-dir {} {}".format(self.example_prog_dir, example_file),
+            ]
         resulting_binary = os.path.join(self.example_prog_dir, "hello")
 
-        self.child = spawn_process(self.command('{} rust'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} rust".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         self.assert_exec_exists()
         self.assertTrue(self.is_in_path(self.exec_path))
-        self.assertTrue(self.is_in_path(os.path.join(self.installed_path, "cargo", "bin", "cargo")))
+        self.assertTrue(
+            self.is_in_path(os.path.join(self.installed_path, "cargo", "bin", "cargo"))
+        )
         cmd_list = ["echo $LD_LIBRARY_PATH"]
         if not self.in_container:
             relogging_command = ["bash", "-l", "-c"]
             relogging_command.extend(cmd_list)
             cmd_list = relogging_command
-        self.assertIn(os.path.join(self.installed_path, "rustc", "lib"),
-                      subprocess.check_output(self.command_as_list(cmd_list)).decode("utf-8").strip().split(":"))
+        self.assertIn(
+            os.path.join(self.installed_path, "rustc", "lib"),
+            subprocess.check_output(self.command_as_list(cmd_list))
+            .decode("utf-8")
+            .strip()
+            .split(":"),
+        )
 
         # compile a small project
         subprocess.check_call(self.command_as_list(compile_command))
 
         # run the compiled result
-        output = subprocess.check_output(self.command_as_list(resulting_binary)).decode()\
-            .replace('\r', '').replace('\n', '')
+        output = (
+            subprocess.check_output(self.command_as_list(resulting_binary))
+            .decode()
+            .replace("\r", "")
+            .replace("\n", "")
+        )
 
         self.assertEqual(output, "hello, world")

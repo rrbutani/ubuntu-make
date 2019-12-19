@@ -67,7 +67,7 @@ class LoggedTestCase(TestCase):
 
 def get_data_dir():
     """Return absolute data dir path"""
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data'))
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
 
 
 def get_root_dir():
@@ -83,13 +83,17 @@ def get_tools_helper_dir():
 def assert_files_identicals(filename1, filename2):
     """Assert if the files content are identical"""
     if open(filename1).read() != open(filename2).read():
-        logger.error("{}: {}\n{}: {}".format(filename1, open(filename1).read(),
-                                             filename2, open(filename2).read()))
+        logger.error(
+            "{}: {}\n{}: {}".format(
+                filename1, open(filename1).read(), filename2, open(filename2).read()
+            )
+        )
         raise AssertionError("{} and {} aren't identical".format(filename1, filename2))
 
 
 class CopyingMock(Mock):
     """Mock for recording calls with mutable arguments"""
+
     def __call__(self, *args, **kwargs):
         args = deepcopy(args)
         kwargs = deepcopy(kwargs)
@@ -103,6 +107,7 @@ def change_xdg_path(key, value=None, remove=False):
         with suppress(KeyError):
             os.environ.pop(key)
     import umake.tools
+
     importlib.reload(xdg.BaseDirectory)
     with suppress(KeyError):
         umake.tools.Singleton._instances.pop(umake.tools.ConfigHandler)
@@ -135,7 +140,7 @@ def swap_file_and_restore(filepath):
         original_content = open(filepath).read()
         yield original_content
     finally:
-        open(filepath, 'w').write(original_content)
+        open(filepath, "w").write(original_content)
 
 
 def set_local_umake():
@@ -169,6 +174,7 @@ def get_desktop_file_path(desktop_filename):
         return ""
 
     from umake.tools import get_launcher_path
+
     importlib.reload(xdg.BaseDirectory)
 
     return get_launcher_path(desktop_filename)
@@ -183,7 +189,7 @@ def get_path_from_desktop_file(desktop_filename, key):
     path = ""
     with open(desktop_file_path) as f:
         for line in f:
-            p = re.search(r'{}=(.*)'.format(key), line)
+            p = re.search(r"{}=(.*)".format(key), line)
             with suppress(AttributeError):
                 path = p.group(1)
 
@@ -206,7 +212,9 @@ def get_path_from_desktop_file(desktop_filename, key):
 
 def is_in_group(group):
     """return if current user is in a group"""
-    for group_name in [g.gr_name for g in grp.getgrall() if os.environ["USER"] in g.gr_mem]:
+    for group_name in [
+        g.gr_name for g in grp.getgrall() if os.environ["USER"] in g.gr_mem
+    ]:
         print(group_name)
         if group_name == group:
             return True

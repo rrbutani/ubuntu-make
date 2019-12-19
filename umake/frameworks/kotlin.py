@@ -31,21 +31,27 @@ logger = logging.getLogger(__name__)
 
 
 class KotlinCategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
-        super().__init__(name="Kotlin", description=_("The Kotlin Programming Language"), logo_path=None)
+        super().__init__(
+            name="Kotlin",
+            description=_("The Kotlin Programming Language"),
+            logo_path=None,
+        )
 
 
 class KotlinLang(umake.frameworks.baseinstaller.BaseInstaller):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Kotlin Lang", description=_("Kotlin language standalone compiler"),
-                         is_category_default=True,
-                         packages_requirements=["openjdk-7-jre | openjdk-8-jre"],
-                         download_page="https://api.github.com/repos/Jetbrains/kotlin/releases/latest",
-                         dir_to_decompress_in_tarball="kotlinc",
-                         required_files_path=[os.path.join("bin", "kotlinc")],
-                         json=True, **kwargs)
+        super().__init__(
+            name="Kotlin Lang",
+            description=_("Kotlin language standalone compiler"),
+            is_category_default=True,
+            packages_requirements=["openjdk-7-jre | openjdk-8-jre"],
+            download_page="https://api.github.com/repos/Jetbrains/kotlin/releases/latest",
+            dir_to_decompress_in_tarball="kotlinc",
+            required_files_path=[os.path.join("bin", "kotlinc")],
+            json=True,
+            **kwargs
+        )
 
     def parse_download_link(self, line, in_download):
         url = line["assets"][0]["browser_download_url"]
@@ -53,5 +59,7 @@ class KotlinLang(umake.frameworks.baseinstaller.BaseInstaller):
 
     def post_install(self):
         """Add the Kotlin binary dir to PATH"""
-        add_env_to_user(self.name, {"PATH": {"value": os.path.join(self.install_path, "bin")}})
+        add_env_to_user(
+            self.name, {"PATH": {"value": os.path.join(self.install_path, "bin")}}
+        )
         UI.delayed_display(DisplayMessage(self.RELOGIN_REQUIRE_MSG.format(self.name)))

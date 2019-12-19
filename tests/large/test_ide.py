@@ -40,7 +40,7 @@ class EclipseJavaIDETests(LargeFrameworkTests):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "eclipse")
         self.desktop_filename = "eclipse-java.desktop"
-        self.command_args = '{} ide eclipse'.format(UMAKE)
+        self.command_args = "{} ide eclipse".format(UMAKE)
         self.name = "Eclipse"
 
     @property
@@ -51,9 +51,13 @@ class EclipseJavaIDETests(LargeFrameworkTests):
     def test_default_eclipse_ide_install(self):
         """Install eclipse from scratch test case"""
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -63,16 +67,23 @@ class EclipseJavaIDETests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
         # on 64 bits, there is a java subprocess, we kill that one with SIGKILL (eclipse isn't reliable on SIGTERM)
         if self.arch_option == "x86_64":
-            self.check_and_kill_process(["java", self.arch_option, self.installed_path],
-                                        wait_before=self.TIMEOUT_START, send_sigkill=True)
+            self.check_and_kill_process(
+                ["java", self.arch_option, self.installed_path],
+                wait_before=self.TIMEOUT_START,
+                send_sigkill=True,
+            )
         else:
-            self.check_and_kill_process([self.exec_path],
-                                        wait_before=self.TIMEOUT_START, send_sigkill=True)
+            self.check_and_kill_process(
+                [self.exec_path], wait_before=self.TIMEOUT_START, send_sigkill=True
+            )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
@@ -89,7 +100,7 @@ class EclipseJEEIDETests(EclipseJavaIDETests):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "eclipse-jee")
         self.desktop_filename = "eclipse-jee.desktop"
-        self.command_args = '{} ide eclipse-jee'.format(UMAKE)
+        self.command_args = "{} ide eclipse-jee".format(UMAKE)
         self.name = "Eclipse JEE"
 
 
@@ -98,9 +109,11 @@ class EclipseJSIDETests(EclipseJavaIDETests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "ide", "eclipse-javascript")
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "eclipse-javascript"
+        )
         self.desktop_filename = "eclipse-javascript.desktop"
-        self.command_args = '{} ide eclipse-javascript'.format(UMAKE)
+        self.command_args = "{} ide eclipse-javascript".format(UMAKE)
         self.name = "Eclipse JavaScript"
 
 
@@ -111,7 +124,7 @@ class EclipsePHPIDETests(EclipseJavaIDETests):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "eclipse-php")
         self.desktop_filename = "eclipse-php.desktop"
-        self.command_args = '{} ide eclipse-php'.format(UMAKE)
+        self.command_args = "{} ide eclipse-php".format(UMAKE)
         self.name = "Eclipse PHP"
 
 
@@ -122,7 +135,7 @@ class EclipseCPPIDETests(EclipseJavaIDETests):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "eclipse-cpp")
         self.desktop_filename = "eclipse-cpp.desktop"
-        self.command_args = '{} ide eclipse-cpp'.format(UMAKE)
+        self.command_args = "{} ide eclipse-cpp".format(UMAKE)
         self.name = "Eclipse CPP"
 
 
@@ -136,19 +149,23 @@ class IdeaIDETests(LargeFrameworkTests):
     def setUp(self):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "idea")
-        self.desktop_filename = 'jetbrains-idea-ce.desktop'
-        self.command_args = '{} ide idea'.format(UMAKE)
-        self.name = 'Idea'
+        self.desktop_filename = "jetbrains-idea-ce.desktop"
+        self.command_args = "{} ide idea".format(UMAKE)
+        self.name = "Idea"
 
     def test_default_install(self):
         """Install from scratch test case"""
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        result = self.return_and_wait_expect(["ERROR: No Stable version available.",
-                                              "Installation done"], timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        result = self.return_and_wait_expect(
+            ["ERROR: No Stable version available.", "Installation done"],
+            timeout=self.TIMEOUT_INSTALL_PROGRESS,
+        )
         if result == 0:
-            self.assertTrue(self.name == 'GoLand')
+            self.assertTrue(self.name == "GoLand")
         elif result == 1:
             # we have an installed launcher, added to the launcher and an icon file
             self.assertTrue(self.launcher_exists_and_is_pinned(self.desktop_filename))
@@ -157,30 +174,45 @@ class IdeaIDETests(LargeFrameworkTests):
             self.assert_exec_link_exists()
 
             # launch it, send SIGTERM and check that it exits fine
-            proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                    stderr=subprocess.DEVNULL)
+            proc = subprocess.Popen(
+                self.command_as_list(self.exec_path),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
 
-            self.check_and_kill_process(["java", self.installed_path], wait_before=self.TIMEOUT_START)
+            self.check_and_kill_process(
+                ["java", self.installed_path], wait_before=self.TIMEOUT_START
+            )
             proc.wait(self.TIMEOUT_STOP)
 
             # ensure that it's detected as installed:
             self.child = spawn_process(self.command(self.command_args))
-            self.expect_and_no_warn("{} is already installed.*\[.*\] ".format(self.name))
+            self.expect_and_no_warn(
+                "{} is already installed.*\[.*\] ".format(self.name)
+            )
             self.child.sendline()
             self.wait_and_close()
 
     def test_eap_install(self):
-        self.installed_path += '-eap'
-        self.desktop_filename = self.desktop_filename.replace('.desktop', '-eap.desktop')
-        self.command_args += ' --eap'
-        self.name += ' EAP'
+        self.installed_path += "-eap"
+        self.desktop_filename = self.desktop_filename.replace(
+            ".desktop", "-eap.desktop"
+        )
+        self.command_args += " --eap"
+        self.name += " EAP"
 
         self.child = spawn_process(self.command(self.command_args))
-        result = self.return_and_wait_expect(["ERROR: No EAP version available.*\[.*\]",
-                                              "Choose installation path: {}".format(self.installed_path)])
+        result = self.return_and_wait_expect(
+            [
+                "ERROR: No EAP version available.*\[.*\]",
+                "Choose installation path: {}".format(self.installed_path),
+            ]
+        )
         if result == 1:
             self.child.sendline("")
-            self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+            self.expect_and_no_warn(
+                "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+            )
             self.wait_and_close()
 
             # we have an installed launcher, added to the launcher and an icon file
@@ -190,15 +222,22 @@ class IdeaIDETests(LargeFrameworkTests):
             self.assert_exec_link_exists()
 
             # launch it, send SIGTERM and check that it exits fine
-            proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                    stderr=subprocess.DEVNULL)
+            proc = subprocess.Popen(
+                self.command_as_list(self.exec_path),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
 
-            self.check_and_kill_process(["java", self.installed_path], wait_before=self.TIMEOUT_START)
+            self.check_and_kill_process(
+                ["java", self.installed_path], wait_before=self.TIMEOUT_START
+            )
             proc.wait(self.TIMEOUT_STOP)
 
             # ensure that it's detected as installed:
             self.child = spawn_process(self.command(self.command_args))
-            self.expect_and_no_warn("{} is already installed.*\[.*\] ".format(self.name))
+            self.expect_and_no_warn(
+                "{} is already installed.*\[.*\] ".format(self.name)
+            )
             self.child.sendline()
             self.wait_and_close()
 
@@ -212,10 +251,12 @@ class IdeaUltimateIDETests(IdeaIDETests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "ide", "idea-ultimate")
-        self.desktop_filename = 'jetbrains-idea.desktop'
-        self.command_args = '{} ide idea-ultimate'.format(UMAKE)
-        self.name = 'Idea Ultimate'
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "idea-ultimate"
+        )
+        self.desktop_filename = "jetbrains-idea.desktop"
+        self.command_args = "{} ide idea-ultimate".format(UMAKE)
+        self.name = "Idea Ultimate"
 
 
 class PyCharmIDETests(IdeaIDETests):
@@ -228,9 +269,9 @@ class PyCharmIDETests(IdeaIDETests):
     def setUp(self):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "pycharm")
-        self.desktop_filename = 'jetbrains-pycharm-ce.desktop'
-        self.command_args = '{} ide pycharm'.format(UMAKE)
-        self.name = 'PyCharm'
+        self.desktop_filename = "jetbrains-pycharm-ce.desktop"
+        self.command_args = "{} ide pycharm".format(UMAKE)
+        self.name = "PyCharm"
 
 
 class PyCharmEducationalIDETests(IdeaIDETests):
@@ -242,10 +283,12 @@ class PyCharmEducationalIDETests(IdeaIDETests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "ide", "pycharm-educational")
-        self.desktop_filename = 'jetbrains-pycharm-edu.desktop'
-        self.command_args = '{} ide pycharm-educational'.format(UMAKE)
-        self.name = 'PyCharm Educational'
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "pycharm-educational"
+        )
+        self.desktop_filename = "jetbrains-pycharm-edu.desktop"
+        self.command_args = "{} ide pycharm-educational".format(UMAKE)
+        self.name = "PyCharm Educational"
 
 
 class PyCharmProfessionalIDETests(IdeaIDETests):
@@ -257,10 +300,12 @@ class PyCharmProfessionalIDETests(IdeaIDETests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "ide", "pycharm-professional")
-        self.desktop_filename = 'jetbrains-pycharm.desktop'
-        self.command_args = '{} ide pycharm-professional'.format(UMAKE)
-        self.name = 'PyCharm Professional'
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "pycharm-professional"
+        )
+        self.desktop_filename = "jetbrains-pycharm.desktop"
+        self.command_args = "{} ide pycharm-professional".format(UMAKE)
+        self.name = "PyCharm Professional"
 
 
 class RubyMineIDETests(IdeaIDETests):
@@ -273,9 +318,9 @@ class RubyMineIDETests(IdeaIDETests):
     def setUp(self):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "rubymine")
-        self.desktop_filename = 'jetbrains-rubymine.desktop'
-        self.command_args = '{} ide rubymine'.format(UMAKE)
-        self.name = 'RubyMine'
+        self.desktop_filename = "jetbrains-rubymine.desktop"
+        self.command_args = "{} ide rubymine".format(UMAKE)
+        self.name = "RubyMine"
 
 
 class WebStormIDETests(IdeaIDETests):
@@ -288,9 +333,9 @@ class WebStormIDETests(IdeaIDETests):
     def setUp(self):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "webstorm")
-        self.desktop_filename = 'jetbrains-webstorm.desktop'
-        self.command_args = '{} ide webstorm'.format(UMAKE)
-        self.name = 'WebStorm'
+        self.desktop_filename = "jetbrains-webstorm.desktop"
+        self.command_args = "{} ide webstorm".format(UMAKE)
+        self.name = "WebStorm"
 
 
 class PhpStormIDETests(IdeaIDETests):
@@ -303,9 +348,9 @@ class PhpStormIDETests(IdeaIDETests):
     def setUp(self):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "phpstorm")
-        self.desktop_filename = 'jetbrains-phpstorm.desktop'
-        self.command_args = '{} ide phpstorm'.format(UMAKE)
-        self.name = 'PhpStorm'
+        self.desktop_filename = "jetbrains-phpstorm.desktop"
+        self.command_args = "{} ide phpstorm".format(UMAKE)
+        self.name = "PhpStorm"
 
 
 class CLionIDETests(IdeaIDETests):
@@ -318,9 +363,9 @@ class CLionIDETests(IdeaIDETests):
     def setUp(self):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "clion")
-        self.desktop_filename = 'jetbrains-clion.desktop'
-        self.command_args = '{} ide clion'.format(UMAKE)
-        self.name = 'CLion'
+        self.desktop_filename = "jetbrains-clion.desktop"
+        self.command_args = "{} ide clion".format(UMAKE)
+        self.name = "CLion"
 
 
 class DataGripIDETests(IdeaIDETests):
@@ -333,9 +378,9 @@ class DataGripIDETests(IdeaIDETests):
     def setUp(self):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "datagrip")
-        self.desktop_filename = 'jetbrains-datagrip.desktop'
-        self.command_args = '{} ide datagrip'.format(UMAKE)
-        self.name = 'DataGrip'
+        self.desktop_filename = "jetbrains-datagrip.desktop"
+        self.command_args = "{} ide datagrip".format(UMAKE)
+        self.name = "DataGrip"
 
 
 class GoLandIDETests(IdeaIDETests):
@@ -348,9 +393,9 @@ class GoLandIDETests(IdeaIDETests):
     def setUp(self):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "goland")
-        self.desktop_filename = 'jetbrains-goland.desktop'
-        self.command_args = '{} ide goland'.format(UMAKE)
-        self.name = 'GoLand'
+        self.desktop_filename = "jetbrains-goland.desktop"
+        self.command_args = "{} ide goland".format(UMAKE)
+        self.name = "GoLand"
 
 
 class RiderIDETests(IdeaIDETests):
@@ -363,9 +408,9 @@ class RiderIDETests(IdeaIDETests):
     def setUp(self):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "rider")
-        self.desktop_filename = 'jetbrains-rider.desktop'
-        self.command_args = '{} ide rider'.format(UMAKE)
-        self.name = 'Rider'
+        self.desktop_filename = "jetbrains-rider.desktop"
+        self.command_args = "{} ide rider".format(UMAKE)
+        self.name = "Rider"
 
 
 class NetBeansTests(LargeFrameworkTests):
@@ -382,10 +427,14 @@ class NetBeansTests(LargeFrameworkTests):
 
     def test_default_install(self):
         """Install from scratch test case"""
-        self.child = spawn_process(self.command('{} ide netbeans'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} ide netbeans".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         logger.info("Installed, running...")
@@ -397,14 +446,19 @@ class NetBeansTests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-        self.check_and_kill_process(["java", self.installed_path], wait_before=self.TIMEOUT_START)
+        self.check_and_kill_process(
+            ["java", self.installed_path], wait_before=self.TIMEOUT_START
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
-        self.child = spawn_process(self.command('{} ide netbeans'.format(UMAKE)))
+        self.child = spawn_process(self.command("{} ide netbeans".format(UMAKE)))
         self.expect_and_no_warn("Netbeans is already installed.*\[.*\] ")
         self.child.sendline()
         self.wait_and_close()
@@ -419,20 +473,26 @@ class VisualStudioCodeTest(LargeFrameworkTests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "ide", "visual-studio-code")
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "visual-studio-code"
+        )
         self.desktop_filename = "visual-studio-code.desktop"
-        self.command_args = '{} ide visual-studio-code'.format(UMAKE)
-        self.name = 'Visual Studio Code'
+        self.command_args = "{} ide visual-studio-code".format(UMAKE)
+        self.name = "Visual Studio Code"
 
     def test_default_install(self):
         """Install visual studio from scratch test case"""
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
         self.expect_and_no_warn("\[I Accept.*\]")  # ensure we have a license question
         self.child.sendline("a")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -442,11 +502,17 @@ class VisualStudioCodeTest(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-        self.check_and_kill_process([os.path.join(self.installed_path, 'code')],
-                                    wait_before=self.TIMEOUT_START, send_sigkill=True)
+        self.check_and_kill_process(
+            [os.path.join(self.installed_path, "code")],
+            wait_before=self.TIMEOUT_START,
+            send_sigkill=True,
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
@@ -458,17 +524,23 @@ class VisualStudioCodeTest(LargeFrameworkTests):
     def test_insiders_install(self):
         """Install visual studio insiders"""
 
-        self.installed_path += '-insiders'
-        self.desktop_filename = self.desktop_filename.replace('.desktop', '-insiders.desktop')
-        self.command_args += ' --insiders'
-        self.name += ' Insiders'
+        self.installed_path += "-insiders"
+        self.desktop_filename = self.desktop_filename.replace(
+            ".desktop", "-insiders.desktop"
+        )
+        self.command_args += " --insiders"
+        self.name += " Insiders"
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
         self.expect_and_no_warn("\[I Accept.*\]")  # ensure we have a license question
         self.child.sendline("a")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -478,16 +550,24 @@ class VisualStudioCodeTest(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-        self.check_and_kill_process([os.path.join(self.installed_path, 'code-insiders')],
-                                    wait_before=self.TIMEOUT_START, send_sigkill=True)
+        self.check_and_kill_process(
+            [os.path.join(self.installed_path, "code-insiders")],
+            wait_before=self.TIMEOUT_START,
+            send_sigkill=True,
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Visual Studio Code Insiders is already installed.*\[.*\] ")
+        self.expect_and_no_warn(
+            "Visual Studio Code Insiders is already installed.*\[.*\] "
+        )
         self.child.sendline()
         self.wait_and_close()
 
@@ -503,15 +583,19 @@ class LightTableTest(LargeFrameworkTests):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "lighttable")
         self.desktop_filename = "lighttable.desktop"
-        self.command_args = '{} ide lighttable'.format(UMAKE)
+        self.command_args = "{} ide lighttable".format(UMAKE)
 
     def test_default_install(self):
         """Install LightTable from scratch test case"""
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -521,11 +605,17 @@ class LightTableTest(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-        self.check_and_kill_process(["LightTable", self.installed_path],
-                                    wait_before=self.TIMEOUT_START, send_sigkill=True)
+        self.check_and_kill_process(
+            ["LightTable", self.installed_path],
+            wait_before=self.TIMEOUT_START,
+            send_sigkill=True,
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
@@ -546,16 +636,20 @@ class AtomTest(LargeFrameworkTests):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "atom")
         self.desktop_filename = "atom.desktop"
-        self.command_args = '{} ide atom'.format(UMAKE)
+        self.command_args = "{} ide atom".format(UMAKE)
         self.name = "Atom"
 
     def test_default_install(self):
         """Install Atom from scratch test case"""
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -564,14 +658,22 @@ class AtomTest(LargeFrameworkTests):
         self.assert_icon_exists()
         self.assert_exec_link_exists()
         # Test if the apm symlink is added correctly:
-        self.assertTrue(self.is_in_path(os.path.join(self.install_base_path, 'bin', 'apm')))
+        self.assertTrue(
+            self.is_in_path(os.path.join(self.install_base_path, "bin", "apm"))
+        )
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-        self.check_and_kill_process(["atom", self.installed_path],
-                                    wait_before=self.TIMEOUT_START, send_sigkill=True)
+        self.check_and_kill_process(
+            ["atom", self.installed_path],
+            wait_before=self.TIMEOUT_START,
+            send_sigkill=True,
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
@@ -582,15 +684,21 @@ class AtomTest(LargeFrameworkTests):
 
     def test_beta_install(self):
         """Install Atom from scratch test case"""
-        self.installed_path += '-beta'
-        self.desktop_filename = self.desktop_filename.replace('.desktop', '-beta.desktop')
-        self.command_args += ' --beta'
-        self.name += ' Beta'
+        self.installed_path += "-beta"
+        self.desktop_filename = self.desktop_filename.replace(
+            ".desktop", "-beta.desktop"
+        )
+        self.command_args += " --beta"
+        self.name += " Beta"
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -599,14 +707,22 @@ class AtomTest(LargeFrameworkTests):
         self.assert_icon_exists()
         self.assert_exec_link_exists()
         # Test if the apm symlink is added correctly:
-        self.assertTrue(self.is_in_path(os.path.join(self.install_base_path, 'bin', 'apm')))
+        self.assertTrue(
+            self.is_in_path(os.path.join(self.install_base_path, "bin", "apm"))
+        )
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-        self.check_and_kill_process(["atom", self.installed_path],
-                                    wait_before=self.TIMEOUT_START, send_sigkill=True)
+        self.check_and_kill_process(
+            ["atom", self.installed_path],
+            wait_before=self.TIMEOUT_START,
+            send_sigkill=True,
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
@@ -627,7 +743,7 @@ class DBeaverTest(LargeFrameworkTests):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "dbeaver")
         self.desktop_filename = "dbeaver.desktop"
-        self.command_args = '{} ide dbeaver'.format(UMAKE)
+        self.command_args = "{} ide dbeaver".format(UMAKE)
         self.name = "DBeaver"
 
     @property
@@ -639,9 +755,13 @@ class DBeaverTest(LargeFrameworkTests):
         """Install DBeaver from scratch test case"""
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -651,16 +771,23 @@ class DBeaverTest(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
         # on 64 bits, there is a java subprocess, we kill that one with SIGKILL (eclipse isn't reliable on SIGTERM)
         if self.arch_option == "x86_64":
-            self.check_and_kill_process(["java", self.arch_option, self.installed_path],
-                                        wait_before=self.TIMEOUT_START, send_sigkill=True)
+            self.check_and_kill_process(
+                ["java", self.arch_option, self.installed_path],
+                wait_before=self.TIMEOUT_START,
+                send_sigkill=True,
+            )
         else:
-            self.check_and_kill_process([self.exec_path],
-                                        wait_before=self.TIMEOUT_START, send_sigkill=True)
+            self.check_and_kill_process(
+                [self.exec_path], wait_before=self.TIMEOUT_START, send_sigkill=True
+            )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
@@ -679,10 +806,12 @@ class SpringToolsSuiteTest(LargeFrameworkTests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "ide", "spring-tools-suite")
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "spring-tools-suite"
+        )
         self.desktop_filename = "STS.desktop"
-        self.command_args = '{} ide spring-tools-suite'.format(UMAKE)
-        self.name = 'Spring Tools Suite'
+        self.command_args = "{} ide spring-tools-suite".format(UMAKE)
+        self.name = "Spring Tools Suite"
 
     @property
     def arch_option(self):
@@ -692,9 +821,13 @@ class SpringToolsSuiteTest(LargeFrameworkTests):
     def test_default_install(self):
         """Install STS from scratch test case"""
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -704,16 +837,23 @@ class SpringToolsSuiteTest(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
         # on 64 bits, there is a java subprocess, we kill that one with SIGKILL (eclipse isn't reliable on SIGTERM)
         if self.arch_option == "x86_64":
-            self.check_and_kill_process(["java", self.arch_option, self.installed_path],
-                                        wait_before=self.TIMEOUT_START, send_sigkill=True)
+            self.check_and_kill_process(
+                ["java", self.arch_option, self.installed_path],
+                wait_before=self.TIMEOUT_START,
+                send_sigkill=True,
+            )
         else:
-            self.check_and_kill_process([self.exec_path],
-                                        wait_before=self.TIMEOUT_START, send_sigkill=True)
+            self.check_and_kill_process(
+                [self.exec_path], wait_before=self.TIMEOUT_START, send_sigkill=True
+            )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
@@ -734,15 +874,19 @@ class RStudioTests(LargeFrameworkTests):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "rstudio")
         self.desktop_filename = "rstudio.desktop"
-        self.command_args = '{} ide rstudio'.format(UMAKE)
+        self.command_args = "{} ide rstudio".format(UMAKE)
 
     def test_default_install(self):
         """Install Sublime Text from scratch test case"""
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -752,9 +896,14 @@ class RStudioTests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
-        self.check_and_kill_process([self.exec_path], wait_before=self.TIMEOUT_START, send_sigkill=True)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        self.check_and_kill_process(
+            [self.exec_path], wait_before=self.TIMEOUT_START, send_sigkill=True
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
@@ -773,17 +922,23 @@ class SublimeTextTests(LargeFrameworkTests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "ide", "sublime-text")
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "sublime-text"
+        )
         self.desktop_filename = "sublime-text.desktop"
-        self.command_args = '{} ide sublime-text'.format(UMAKE)
+        self.command_args = "{} ide sublime-text".format(UMAKE)
 
     def test_default_install(self):
         """Install Sublime Text from scratch test case"""
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -793,9 +948,14 @@ class SublimeTextTests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
-        self.check_and_kill_process([self.exec_path], wait_before=self.TIMEOUT_START, send_sigkill=True)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        self.check_and_kill_process(
+            [self.exec_path], wait_before=self.TIMEOUT_START, send_sigkill=True
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
@@ -816,7 +976,7 @@ class ProcessingTests(LargeFrameworkTests):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "processing")
         self.desktop_filename = "processing.desktop"
-        self.command_args = '{} ide processing'.format(UMAKE)
+        self.command_args = "{} ide processing".format(UMAKE)
 
     @property
     def arch_option(self):
@@ -827,9 +987,13 @@ class ProcessingTests(LargeFrameworkTests):
         """Install Processing from scratch test case"""
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -839,10 +1003,15 @@ class ProcessingTests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-        self.check_and_kill_process(["java", "processing.app.Base"], wait_before=self.TIMEOUT_START)
+        self.check_and_kill_process(
+            ["java", "processing.app.Base"], wait_before=self.TIMEOUT_START
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
@@ -863,7 +1032,7 @@ class LiteIDETests(LargeFrameworkTests):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "ide", "liteide")
         self.desktop_filename = "liteide.desktop"
-        self.command_args = '{} ide liteide'.format(UMAKE)
+        self.command_args = "{} ide liteide".format(UMAKE)
 
     @property
     def arch_option(self):
@@ -874,9 +1043,13 @@ class LiteIDETests(LargeFrameworkTests):
         """Install LiteIDE from scratch test case"""
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -886,11 +1059,17 @@ class LiteIDETests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-        self.check_and_kill_process(["liteide", self.installed_path],
-                                    wait_before=self.TIMEOUT_START, send_sigkill=True)
+        self.check_and_kill_process(
+            ["liteide", self.installed_path],
+            wait_before=self.TIMEOUT_START,
+            send_sigkill=True,
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:

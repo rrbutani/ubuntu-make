@@ -24,17 +24,23 @@ import umake.frameworks
 
 
 class CategoryG(umake.frameworks.BaseCategory):
-
     def __init__(self):
-        super().__init__(name="Category G", description="Category G to test installed state",
-                         packages_requirements=["baz"])
+        super().__init__(
+            name="Category G",
+            description="Category G to test installed state",
+            packages_requirements=["baz"],
+        )
 
 
 class FrameworkA(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework A", description="Description for framework A (with add req.)",
-                         install_path_dir="/", packages_requirements=["buz", "biz"], **kwargs)
+        super().__init__(
+            name="Framework A",
+            description="Description for framework A (with add req.)",
+            install_path_dir="/",
+            packages_requirements=["buz", "biz"],
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()
@@ -44,10 +50,13 @@ class FrameworkA(umake.frameworks.BaseFramework):
 
 
 class FrameworkB(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework B", description="Description for framework B (with no req.)",
-                         install_path_dir="/", **kwargs)
+        super().__init__(
+            name="Framework B",
+            description="Description for framework B (with no req.)",
+            install_path_dir="/",
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()

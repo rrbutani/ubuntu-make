@@ -28,9 +28,20 @@ import signal
 import stat
 import subprocess
 from time import sleep
-from umake.tools import get_icon_path, get_launcher_path, launcher_exists_and_is_pinned, remove_framework_envs_from_user
-from ..tools import LoggedTestCase, get_path_from_desktop_file, is_in_group, INSTALL_DIR, swap_file_and_restore, \
-    spawn_process
+from umake.tools import (
+    get_icon_path,
+    get_launcher_path,
+    launcher_exists_and_is_pinned,
+    remove_framework_envs_from_user,
+)
+from ..tools import (
+    LoggedTestCase,
+    get_path_from_desktop_file,
+    is_in_group,
+    INSTALL_DIR,
+    swap_file_and_restore,
+    spawn_process,
+)
 from umake.settings import DEFAULT_BINARY_LINK_PATH
 
 
@@ -77,19 +88,21 @@ class LargeFrameworkTests(LoggedTestCase):
 
     def _pid_for(self, process_grep):
         """Return pid matching the process_grep elements"""
-        for pid in os.listdir('/proc'):
+        for pid in os.listdir("/proc"):
             if not pid.isdigit():
                 continue
             # ignore processes that are closed in between
             with suppress(IOError):
-                cmdline = open(os.path.join('/proc', pid, 'cmdline'), 'r').read()
+                cmdline = open(os.path.join("/proc", pid, "cmdline"), "r").read()
                 for process_elem in process_grep:
                     if process_elem not in cmdline:
                         break
                 # we found it
                 else:
                     return int(pid)
-        raise BaseException("The process that we can find with {} isn't started".format(process_grep))
+        raise BaseException(
+            "The process that we can find with {} isn't started".format(process_grep)
+        )
 
     def check_and_kill_process(self, process_grep, wait_before=0, send_sigkill=False):
         """Check a process matching process_grep exists and kill it"""
@@ -102,7 +115,7 @@ class LargeFrameworkTests(LoggedTestCase):
 
     @property
     def exec_link(self):
-        return os.path.join(self.binary_dir, self.desktop_filename.split('.')[0])
+        return os.path.join(self.binary_dir, self.desktop_filename.split(".")[0])
 
     @property
     def exec_path(self):
@@ -122,7 +135,9 @@ class LargeFrameworkTests(LoggedTestCase):
 
     def assert_icon_exists(self):
         """Assert that the icon path exists"""
-        self.assertTrue(self.path_exists(self._get_path_from_desktop_file('Icon', get_icon_path)))
+        self.assertTrue(
+            self.path_exists(self._get_path_from_desktop_file("Icon", get_icon_path))
+        )
 
     def assert_exec_link_exists(self):
         """Assert that the link to the binary exists"""
@@ -133,7 +148,9 @@ class LargeFrameworkTests(LoggedTestCase):
         if not expect_warn:
             # We need to remove the first expected message, which is "Logging level set to "
             # (can be WARNING or ERROR)
-            content = content.replace("Logging level set to WARNING", "").replace("Logging level set to ERROR", "")
+            content = content.replace("Logging level set to WARNING", "").replace(
+                "Logging level set to ERROR", ""
+            )
             self.assertNotIn("WARNING", content)
             self.assertNotIn("ERROR", content)
         else:
@@ -141,7 +158,9 @@ class LargeFrameworkTests(LoggedTestCase):
                 if warn_tag in content:
                     break
             else:  # nothing found:
-                raise BaseException("We didn't find an expected WARNING or ERROR in {}".format(content))
+                raise BaseException(
+                    "We didn't find an expected WARNING or ERROR in {}".format(content)
+                )
 
     def return_and_wait_expect(self, expect_query, timeout=-1):
         """run the expect query and return the result"""
@@ -218,13 +237,19 @@ class LargeFrameworkTests(LoggedTestCase):
 
     def is_in_path(self, filename):
         """check that we have a directory in path"""
-        return_code = subprocess.call(["bash", "-l", "which", filename], stdin=subprocess.DEVNULL,
-                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return_code = subprocess.call(
+            ["bash", "-l", "which", filename],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         if return_code == 0:
             return True
         elif return_code == 1:
             return False
-        raise BaseException("Unknown return code for looking if {} is in path".format(filename))
+        raise BaseException(
+            "Unknown return code for looking if {} is in path".format(filename)
+        )
 
     def is_in_group(self, group):
         """return if current user is in a group"""
@@ -236,7 +261,7 @@ class LargeFrameworkTests(LoggedTestCase):
 
     def create_file(self, path, content):
         """passthrough to create a file on the disk"""
-        open(path, 'w').write(content)
+        open(path, "w").write(content)
 
     @nottest
     def bad_download_page_test(self, command, content_file_path):
@@ -245,6 +270,8 @@ class LargeFrameworkTests(LoggedTestCase):
             with open(content_file_path, "w") as newfile:
                 newfile.write("foo")
             self.child = spawn_process(command)
-            self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+            self.expect_and_no_warn(
+                "Choose installation path: {}".format(self.installed_path)
+            )
             self.child.sendline("")
             self.wait_and_close(expect_warn=True, exit_status=1)

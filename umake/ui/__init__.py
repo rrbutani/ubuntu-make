@@ -39,11 +39,15 @@ class UI(object, metaclass=Singleton):
         try:
             truncated_version = get_version().split("+")[0]
             if status_code == 1 and not (get_latest_version() == truncated_version):
-                print('''
+                print(
+                    """
 Your currently installed version ({}) differs from the latest release ({})
 Many issues are usually fixed in more up to date versions.
 To get the latest version you can read the instructions at https://github.com/ubuntu/ubuntu-make
-'''.format(get_version(), get_latest_version()))
+""".format(
+                        get_version(), get_latest_version()
+                    )
+                )
         except Exception as e:
             logger.error(e)
         cls.currentUI._return_main_screen(status_code=status_code)

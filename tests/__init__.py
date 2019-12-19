@@ -27,16 +27,20 @@ from unittest import TestCase
 
 
 class CodeCheck(TestCase):
-
     def test_pep8(self):
         """Proceed a pep8 checking
 
         Note that we have a .pep8 config file for maximum line length tweak
         and excluding the virtualenv dir."""
-        pep8style = pep8.StyleGuide(config_file=os.path.join(get_root_dir(), '.pep8'))
+        pep8style = pep8.StyleGuide(config_file=os.path.join(get_root_dir(), ".pep8"))
 
         # we want to use either local or system umake, but always local tests files
         umake_dir = os.path.dirname(umake.__file__)
-        results = pep8style.check_files([umake_dir, os.path.join(get_root_dir(), "tests"),
-                                         os.path.join(get_root_dir(), "bin")])
+        results = pep8style.check_files(
+            [
+                umake_dir,
+                os.path.join(get_root_dir(), "tests"),
+                os.path.join(get_root_dir(), "bin"),
+            ]
+        )
         self.assertEqual(results.get_statistics(), [])

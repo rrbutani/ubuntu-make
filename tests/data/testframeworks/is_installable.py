@@ -24,16 +24,17 @@ import umake.frameworks
 
 
 class ECategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
         super().__init__(name="Category E", description="Category E description")
 
 
 class FrameworkA(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework A", description="Description for framework A (installable chained to parent)",
-                         **kwargs)
+        super().__init__(
+            name="Framework A",
+            description="Description for framework A (installable chained to parent)",
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()
@@ -47,12 +48,15 @@ class FrameworkA(umake.frameworks.BaseFramework):
 
 
 class FrameworkB(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework B", description="Description for framework B (installable forced to True even "
-                                                         "with archs restrictions)",
-                         only_on_archs=["archswhichdontexist"], only_ubuntu_version=["versionwhichdontexist"],
-                         **kwargs)
+        super().__init__(
+            name="Framework B",
+            description="Description for framework B (installable forced to True even "
+            "with archs restrictions)",
+            only_on_archs=["archswhichdontexist"],
+            only_ubuntu_version=["versionwhichdontexist"],
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()
@@ -67,11 +71,13 @@ class FrameworkB(umake.frameworks.BaseFramework):
 
 
 class FrameworkC(umake.frameworks.BaseFramework):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Framework C", description="Description for framework C (installable forced to False "
-                                                         "even with no restriction",
-                         **kwargs)
+        super().__init__(
+            name="Framework C",
+            description="Description for framework C (installable forced to False "
+            "even with no restriction",
+            **kwargs
+        )
 
     def setup(self, install_path=None, auto_accept_license=False):
         super().setup()

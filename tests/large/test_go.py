@@ -55,17 +55,25 @@ class GoTests(LargeFrameworkTests):
         else:  # our mock expects getting that path
             compile_command = ["bash", "-l", "go run /tmp/hello.go"]
 
-        self.child = spawn_process(self.command('{} go'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} go".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         self.assert_exec_exists()
         self.assertTrue(self.is_in_path(self.exec_path))
 
         # compile a small project
-        output = subprocess.check_output(self.command_as_list(compile_command)).decode()\
-            .replace('\r', '').replace('\n', '')
+        output = (
+            subprocess.check_output(self.command_as_list(compile_command))
+            .decode()
+            .replace("\r", "")
+            .replace("\n", "")
+        )
 
         self.assertEqual(output, "hello, world")

@@ -26,8 +26,17 @@ import os
 import shutil
 import sys
 import tempfile
-from ..data.testframeworks.uninstantiableframework import Uninstantiable, InheritedFromUninstantiable
-from ..tools import get_data_dir, change_xdg_path, patchelem, LoggedTestCase, INSTALL_DIR
+from ..data.testframeworks.uninstantiableframework import (
+    Uninstantiable,
+    InheritedFromUninstantiable,
+)
+from ..tools import (
+    get_data_dir,
+    change_xdg_path,
+    patchelem,
+    LoggedTestCase,
+    INSTALL_DIR,
+)
 import umake
 from umake import frameworks
 from umake.frameworks.baseinstaller import BaseInstaller
@@ -49,17 +58,17 @@ class BaseFrameworkLoader(LoggedTestCase):
     def setUp(self):
         """Ensure we don't have any config file loaded"""
         super().setUp()
-        change_xdg_path('XDG_CONFIG_HOME', self.config_dir_for_name("foo"))
+        change_xdg_path("XDG_CONFIG_HOME", self.config_dir_for_name("foo"))
 
     def tearDown(self):
-        change_xdg_path('XDG_CONFIG_HOME', remove=True)
+        change_xdg_path("XDG_CONFIG_HOME", remove=True)
         # we reset the loaded categories
         self.CategoryHandler.categories = NoneDict()
         super().tearDown()
 
     def config_dir_for_name(self, name):
         """Return the config dir for this name"""
-        return os.path.join(get_data_dir(), 'configs', name)
+        return os.path.join(get_data_dir(), "configs", name)
 
     def fake_arch_version(self, arch, version):
         """Help to mock the current arch and version on further calls"""
@@ -68,15 +77,21 @@ class BaseFrameworkLoader(LoggedTestCase):
         self.get_current_arch_mock.return_value = arch
         umake.frameworks.get_current_arch = self.get_current_arch_mock
 
-        self._saved_current_ubuntu_version_fn = umake.frameworks.get_current_distro_version
+        self._saved_current_ubuntu_version_fn = (
+            umake.frameworks.get_current_distro_version
+        )
         self.get_current_distro_version_mock = Mock()
         self.get_current_distro_version_mock.return_value = version
-        umake.frameworks.get_current_distro_version = self.get_current_distro_version_mock
+        umake.frameworks.get_current_distro_version = (
+            self.get_current_distro_version_mock
+        )
 
     def restore_arch_version(self):
         """Restore initial current arch and version"""
         umake.frameworks.get_current_arch = self._saved_current_arch_fn
-        umake.frameworks.get_current_distro_version = self._saved_current_ubuntu_version_fn
+        umake.frameworks.get_current_distro_version = (
+            self._saved_current_ubuntu_version_fn
+        )
 
 
 class TestFrameworkLoader(BaseFrameworkLoader):
@@ -86,7 +101,7 @@ class TestFrameworkLoader(BaseFrameworkLoader):
     def setUpClass(cls):
         super().setUpClass()
         sys.path.append(get_data_dir())
-        cls.testframeworks_dir = os.path.join(get_data_dir(), 'testframeworks')
+        cls.testframeworks_dir = os.path.join(get_data_dir(), "testframeworks")
 
     @classmethod
     def tearDownClass(cls):
@@ -98,8 +113,11 @@ class TestFrameworkLoader(BaseFrameworkLoader):
         # fake versions and archs
         self.fake_arch_version("bar", "10.10.10")
         # load custom framework-directory
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "testframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "testframeworks"):
             frameworks.load_frameworks()
         self.categoryA = self.CategoryHandler.categories["category-a"]
 
@@ -109,19 +127,40 @@ class TestFrameworkLoader(BaseFrameworkLoader):
 
     def test_load_main_category(self):
         """The main category is loaded"""
-        self.assertEqual(len([1 for category in self.CategoryHandler.categories.values()
-                              if category.is_main_category]), 1, str(self.CategoryHandler.categories.values()))
+        self.assertEqual(
+            len(
+                [
+                    1
+                    for category in self.CategoryHandler.categories.values()
+                    if category.is_main_category
+                ]
+            ),
+            1,
+            str(self.CategoryHandler.categories.values()),
+        )
 
     def test_get_main_category(self):
         """main_category property returns main category"""
-        main_category = [category for category in self.CategoryHandler.categories.values()
-                         if category.is_main_category][0]
+        main_category = [
+            category
+            for category in self.CategoryHandler.categories.values()
+            if category.is_main_category
+        ][0]
         self.assertEqual(self.CategoryHandler.main_category, main_category)
 
     def test_load_category(self):
         """There is at least one category (not main) loaded"""
-        self.assertTrue(len([1 for category in self.CategoryHandler.categories.values()
-                             if not category.is_main_category]) > 0, str(self.CategoryHandler.categories.values()))
+        self.assertTrue(
+            len(
+                [
+                    1
+                    for category in self.CategoryHandler.categories.values()
+                    if not category.is_main_category
+                ]
+            )
+            > 0,
+            str(self.CategoryHandler.categories.values()),
+        )
 
     def test_get_category_by_prog_name(self):
         """categories index returns matching category"""
@@ -140,18 +179,25 @@ class TestFrameworkLoader(BaseFrameworkLoader):
     def test_get_category_prog_name(self):
         """prog_name for category is what we expect"""
         self.assertEqual(self.categoryA.prog_name, "category-a")
-        self.assertEqual(self.CategoryHandler.categories["category-b"].prog_name, "category-b")
+        self.assertEqual(
+            self.CategoryHandler.categories["category-b"].prog_name, "category-b"
+        )
 
     def test_multiple_files_loaded(self):
         """We load multiple categories in different files"""
         # main category, + at least 2 other categories
-        self.assertTrue(len(self.CategoryHandler.categories) > 2, str(self.CategoryHandler.categories))
+        self.assertTrue(
+            len(self.CategoryHandler.categories) > 2,
+            str(self.CategoryHandler.categories),
+        )
         self.assertIsNotNone(self.categoryA)
         self.assertIsNotNone(self.CategoryHandler.categories["category-b"])
 
     def test_frameworks_loaded(self):
         """We have frameworks attached to a category"""
-        self.assertTrue(len(self.categoryA.frameworks) > 1, str(self.categoryA.frameworks))
+        self.assertTrue(
+            len(self.categoryA.frameworks) > 1, str(self.categoryA.frameworks)
+        )
         self.assertTrue(self.categoryA.has_frameworks())
 
     def test_framework_not_existing(self):
@@ -160,8 +206,10 @@ class TestFrameworkLoader(BaseFrameworkLoader):
 
     def test_frameworks_doesn_t_mix(self):
         """Frameworks, even with the same name, don't mix between categories"""
-        self.assertNotEqual(self.categoryA.frameworks["framework-a"],
-                            self.CategoryHandler.categories["category-b"].frameworks["framework-a"])
+        self.assertNotEqual(
+            self.categoryA.frameworks["framework-a"],
+            self.CategoryHandler.categories["category-b"].frameworks["framework-a"],
+        )
 
     def test_has_more_than_one_framework(self):
         """more than one frameworks in a category is correctly reported"""
@@ -173,38 +221,62 @@ class TestFrameworkLoader(BaseFrameworkLoader):
 
     def test_has_frameworks_on_empty_category(self):
         """has_frameworks return False on empty category"""
-        self.assertFalse(self.CategoryHandler.categories["empty-category"].has_frameworks())
-        self.assertFalse(self.CategoryHandler.categories["empty-category"].has_one_framework())
+        self.assertFalse(
+            self.CategoryHandler.categories["empty-category"].has_frameworks()
+        )
+        self.assertFalse(
+            self.CategoryHandler.categories["empty-category"].has_one_framework()
+        )
 
     def test_one_framework_category(self):
         """A category with one framework is reported as so"""
-        self.assertTrue(self.CategoryHandler.categories["one-framework-category"].has_one_framework())
+        self.assertTrue(
+            self.CategoryHandler.categories[
+                "one-framework-category"
+            ].has_one_framework()
+        )
 
     def test_framework_prog_name(self):
         """prog_name for framework is what we expect"""
-        self.assertEqual(self.categoryA.frameworks["framework-a"].prog_name, "framework-a")
-        self.assertEqual(self.categoryA.frameworks["framework-b"].prog_name, "framework-b")
+        self.assertEqual(
+            self.categoryA.frameworks["framework-a"].prog_name, "framework-a"
+        )
+        self.assertEqual(
+            self.categoryA.frameworks["framework-b"].prog_name, "framework-b"
+        )
 
     def test_nothing_installed(self):
         """Category returns that no framework is installed"""
-        self.assertEqual(self.categoryA.is_installed, self.CategoryHandler.NOT_INSTALLED)
+        self.assertEqual(
+            self.categoryA.is_installed, self.CategoryHandler.NOT_INSTALLED
+        )
 
     def test_category_fully_installed(self):
         """Category returns than all frameworks are installed"""
-        self.assertEqual(self.CategoryHandler.categories["category-b"].is_installed,
-                         self.CategoryHandler.FULLY_INSTALLED)
+        self.assertEqual(
+            self.CategoryHandler.categories["category-b"].is_installed,
+            self.CategoryHandler.FULLY_INSTALLED,
+        )
 
     def test_category_half_installed(self):
         """Category returns than half frameworks are installed"""
-        self.assertEqual(self.CategoryHandler.categories["category-c"].is_installed,
-                         self.CategoryHandler.PARTIALLY_INSTALLED)
+        self.assertEqual(
+            self.CategoryHandler.categories["category-c"].is_installed,
+            self.CategoryHandler.PARTIALLY_INSTALLED,
+        )
 
     def test_frameworks_loaded_in_main_category(self):
         """Some frameworks are loaded and attached to main category"""
-        self.assertTrue(len(self.CategoryHandler.main_category.frameworks) > 1,
-                        str(self.CategoryHandler.main_category.frameworks))
-        self.assertIsNotNone(self.CategoryHandler.main_category.frameworks["framework-free-a"])
-        self.assertIsNotNone(self.CategoryHandler.main_category.frameworks["framework-free---b"])
+        self.assertTrue(
+            len(self.CategoryHandler.main_category.frameworks) > 1,
+            str(self.CategoryHandler.main_category.frameworks),
+        )
+        self.assertIsNotNone(
+            self.CategoryHandler.main_category.frameworks["framework-free-a"]
+        )
+        self.assertIsNotNone(
+            self.CategoryHandler.main_category.frameworks["framework-free---b"]
+        )
 
     def test_frameworks_report_installed(self):
         """Frameworks have an is_installed property"""
@@ -219,13 +291,17 @@ class TestFrameworkLoader(BaseFrameworkLoader):
 
     def test_default_install_path(self):
         """Default install path is what we expect, based on category-and framework prog_name"""
-        self.assertEqual(self.categoryA.frameworks["framework-b"].install_path,
-                         os.path.expanduser("~/{}/category-a/framework-b".format(INSTALL_DIR)))
+        self.assertEqual(
+            self.categoryA.frameworks["framework-b"].install_path,
+            os.path.expanduser("~/{}/category-a/framework-b".format(INSTALL_DIR)),
+        )
 
     def test_specified_at_load_install_path(self):
         """Default install path is overridden by framework specified install path at load time"""
-        self.assertEqual(self.categoryA.frameworks["framework-a"].install_path,
-                         os.path.expanduser("~/{}/custom/frameworka".format(INSTALL_DIR)))
+        self.assertEqual(
+            self.categoryA.frameworks["framework-a"].install_path,
+            os.path.expanduser("~/{}/custom/frameworka".format(INSTALL_DIR)),
+        )
 
     def test_no_restriction_installable_framework(self):
         """Framework with an no arch or version restriction is installable"""
@@ -233,39 +309,67 @@ class TestFrameworkLoader(BaseFrameworkLoader):
 
     def test_right_arch_right_version_framework(self):
         """Framework with a correct arch and correct version is installable"""
-        self.assertTrue(self.CategoryHandler.categories["category-d"].frameworks["framework-c"].is_installable)
+        self.assertTrue(
+            self.CategoryHandler.categories["category-d"]
+            .frameworks["framework-c"]
+            .is_installable
+        )
 
     def test_unsupported_arch_framework(self):
         """Framework with an unsupported arch isn't registered"""
-        self.assertIsNone(self.CategoryHandler.categories["category-d"].frameworks["framework-a"])
+        self.assertIsNone(
+            self.CategoryHandler.categories["category-d"].frameworks["framework-a"]
+        )
 
     def test_unsupported_version_framework(self):
         """Framework with an unsupported arch isn't registered"""
-        self.assertIsNone(self.CategoryHandler.categories["category-d"].frameworks["framework-b"])
+        self.assertIsNone(
+            self.CategoryHandler.categories["category-d"].frameworks["framework-b"]
+        )
 
     def test_child_installable_chained_parent(self):
         """Framework with an is_installable chained to parent"""
-        self.assertTrue(self.CategoryHandler.categories["category-e"].frameworks["framework-a"].is_installable)
+        self.assertTrue(
+            self.CategoryHandler.categories["category-e"]
+            .frameworks["framework-a"]
+            .is_installable
+        )
 
     def test_child_installable_overridden(self):
         """Framework with an is_installable override to True from children (with unmatched restrictions)"""
-        self.assertTrue(self.CategoryHandler.categories["category-e"].frameworks["framework-b"].is_installable)
+        self.assertTrue(
+            self.CategoryHandler.categories["category-e"]
+            .frameworks["framework-b"]
+            .is_installable
+        )
 
     def test_child_installable_overridden_false(self):
         """Framework with an is_installable override to False from children (with no restrictions)"""
-        self.assertIsNone(self.CategoryHandler.categories["category-e"].frameworks["framework-c"])
+        self.assertIsNone(
+            self.CategoryHandler.categories["category-e"].frameworks["framework-c"]
+        )
 
     def test_check_not_installed_wrong_path(self):
         """Framework isn't installed path doesn't exist"""
-        self.assertFalse(self.CategoryHandler.categories["category-f"].frameworks["framework-a"].is_installed)
+        self.assertFalse(
+            self.CategoryHandler.categories["category-f"]
+            .frameworks["framework-a"]
+            .is_installed
+        )
 
     def test_check_installed_right_path_no_package_req(self):
         """Framework is installed if right path but no package req."""
-        self.assertTrue(self.CategoryHandler.categories["category-f"].frameworks["framework-b"].is_installed)
+        self.assertTrue(
+            self.CategoryHandler.categories["category-f"]
+            .frameworks["framework-b"]
+            .is_installed
+        )
 
     def test_check_unmatched_requirements_not_installed(self):
         """Framework with unmatched requirements are not registered"""
-        self.assertIsNone(self.CategoryHandler.categories["category-f"].frameworks["framework-c"])
+        self.assertIsNone(
+            self.CategoryHandler.categories["category-f"].frameworks["framework-c"]
+        )
 
     def test_no_root_need_if_no_requirements(self):
         """Framework with not requirements don't need root access"""
@@ -273,21 +377,35 @@ class TestFrameworkLoader(BaseFrameworkLoader):
 
     def test_uninstalled_framework_marked_for_removal_only_not_registered(self):
         """Uninstalled framework marked for removal only isn't not registered (as we can't install it back)"""
-        self.assertIsNone(self.CategoryHandler.categories["category-r"].frameworks["framework-r-uninstalled"])
+        self.assertIsNone(
+            self.CategoryHandler.categories["category-r"].frameworks[
+                "framework-r-uninstalled"
+            ]
+        )
 
     def test_installed_framework_not_installable_registered(self):
         """Installed framework not installable are still registered (can be used for removal)"""
-        self.assertIsNotNone(self.CategoryHandler.categories["category-r"]
-                                 .frameworks["framework-r-installed-not-installable"])
+        self.assertIsNotNone(
+            self.CategoryHandler.categories["category-r"].frameworks[
+                "framework-r-installed-not-installable"
+            ]
+        )
 
     def test_installed_framework_marked_for_removal_only_registered(self):
         """Installed framework marked for removal only is registered to be able to remove it"""
-        self.assertIsNotNone(self.CategoryHandler.categories["category-r"].frameworks["framework-r-installed"])
+        self.assertIsNotNone(
+            self.CategoryHandler.categories["category-r"].frameworks[
+                "framework-r-installed"
+            ]
+        )
 
     def test_installed_framework_marked_for_removal_only_not_installable(self):
         """Installed framework that are marked for removal only are not installable"""
-        self.assertFalse(self.CategoryHandler.categories["category-r"].frameworks["framework-r-installed"]
-                         .is_installable)
+        self.assertFalse(
+            self.CategoryHandler.categories["category-r"]
+            .frameworks["framework-r-installed"]
+            .is_installable
+        )
 
     def test_parse_category_and_framework_run_correct_framework(self):
         """Parsing category and framework return right category and framework"""
@@ -297,12 +415,16 @@ class TestFrameworkLoader(BaseFrameworkLoader):
         args.framework = "framework-b"
         args.accept_license = False
         args.remove = False
-        with patch.object(self.CategoryHandler.categories[args.category].frameworks["framework-b"], "setup")\
-                as setup_call:
+        with patch.object(
+            self.CategoryHandler.categories[args.category].frameworks["framework-b"],
+            "setup",
+        ) as setup_call:
             self.CategoryHandler.categories[args.category].run_for(args)
 
             self.assertTrue(setup_call.called)
-            self.assertEqual(setup_call.call_args, call(install_path=None, auto_accept_license=False))
+            self.assertEqual(
+                setup_call.call_args, call(install_path=None, auto_accept_license=False)
+            )
 
     def test_parse_no_framework_run_default_for_category(self):
         """Parsing category will run default framework"""
@@ -312,11 +434,15 @@ class TestFrameworkLoader(BaseFrameworkLoader):
         args.framework = None
         args.accept_license = False
         args.remove = False
-        with patch.object(self.CategoryHandler.categories[args.category].frameworks["framework-a"], "setup")\
-                as setup_call:
+        with patch.object(
+            self.CategoryHandler.categories[args.category].frameworks["framework-a"],
+            "setup",
+        ) as setup_call:
             self.CategoryHandler.categories[args.category].run_for(args)
             self.assertTrue(setup_call.called)
-            self.assertEqual(setup_call.call_args, call(install_path=None, auto_accept_license=False))
+            self.assertEqual(
+                setup_call.call_args, call(install_path=None, auto_accept_license=False)
+            )
 
     def test_parse_category_and_framework_run_correct_remove_framework(self):
         """Parsing category and framework with --remove run remove on right category and framework"""
@@ -326,8 +452,10 @@ class TestFrameworkLoader(BaseFrameworkLoader):
         args.framework = "framework-b"
         args.accept_license = False
         args.remove = True
-        with patch.object(self.CategoryHandler.categories[args.category].frameworks["framework-b"], "remove")\
-                as remove_call:
+        with patch.object(
+            self.CategoryHandler.categories[args.category].frameworks["framework-b"],
+            "remove",
+        ) as remove_call:
             self.CategoryHandler.categories[args.category].run_for(args)
 
             self.assertTrue(remove_call.called)
@@ -341,8 +469,10 @@ class TestFrameworkLoader(BaseFrameworkLoader):
         args.remove = True
         args.accept_license = False
         args.destdir = None
-        with patch.object(self.CategoryHandler.categories[args.category].frameworks["framework-a"], "remove")\
-                as remove_call:
+        with patch.object(
+            self.CategoryHandler.categories[args.category].frameworks["framework-a"],
+            "remove",
+        ) as remove_call:
             self.CategoryHandler.categories[args.category].run_for(args)
 
             self.assertTrue(remove_call.called)
@@ -355,20 +485,28 @@ class TestFrameworkLoader(BaseFrameworkLoader):
         args.framework = None
         args.accept_license = False
         args.remove = False
-        self.assertRaises(BaseException, self.CategoryHandler.categories[args.category].run_for, args)
+        self.assertRaises(
+            BaseException, self.CategoryHandler.categories[args.category].run_for, args
+        )
         self.expect_warn_error = True
 
-    def test_parse_category_and_framework_cannot_run_remove_with_destdir_framework(self):
+    def test_parse_category_and_framework_cannot_run_remove_with_destdir_framework(
+        self,
+    ):
         """Parsing category and framework with remove and destdir raises an error"""
         args = Mock()
         args.category = "category-a"
         args.framework = "framework-b"
         args.remove = True
         args.accept_license = False
-        self.assertRaises(BaseException, self.CategoryHandler.categories[args.category].run_for, args)
+        self.assertRaises(
+            BaseException, self.CategoryHandler.categories[args.category].run_for, args
+        )
         self.expect_warn_error = True
 
-    def test_parse_category_and_framework_cannot_install_not_installable_but_installed_framework(self):
+    def test_parse_category_and_framework_cannot_install_not_installable_but_installed_framework(
+        self,
+    ):
         """We cannot install frameworks that are not installable but already installed (and so, registered)"""
         self.expect_warn_error = True
         args = Mock()
@@ -377,9 +515,13 @@ class TestFrameworkLoader(BaseFrameworkLoader):
         args.framework = "framework-r-installed-not-installable"
         args.accept_license = False
         args.remove = False
-        self.assertRaises(BaseException, self.CategoryHandler.categories[args.category].run_for, args)
+        self.assertRaises(
+            BaseException, self.CategoryHandler.categories[args.category].run_for, args
+        )
 
-    def test_parse_category_and_framework_can_remove_not_installable_but_installed_framework(self):
+    def test_parse_category_and_framework_can_remove_not_installable_but_installed_framework(
+        self,
+    ):
         """Parsing category and frameworks with --remove can remove not installable but installed framework"""
         args = Mock()
         args.category = "category-r"
@@ -387,8 +529,12 @@ class TestFrameworkLoader(BaseFrameworkLoader):
         args.framework = "framework-r-installed"
         args.accept_license = False
         args.remove = True
-        with patch.object(self.CategoryHandler.categories[args.category].frameworks["framework-r-installed"], "remove")\
-                as remove_call:
+        with patch.object(
+            self.CategoryHandler.categories[args.category].frameworks[
+                "framework-r-installed"
+            ],
+            "remove",
+        ) as remove_call:
             self.CategoryHandler.categories[args.category].run_for(args)
 
             self.assertTrue(remove_call.called)
@@ -402,26 +548,38 @@ class TestFrameworkLoader(BaseFrameworkLoader):
         args.framework = "framework-b"
         args.accept_license = True
         args.remove = False
-        with patch.object(self.CategoryHandler.categories[args.category].frameworks["framework-b"], "setup")\
-                as setup_call:
+        with patch.object(
+            self.CategoryHandler.categories[args.category].frameworks["framework-b"],
+            "setup",
+        ) as setup_call:
             self.CategoryHandler.categories[args.category].run_for(args)
 
             self.assertTrue(setup_call.called)
-            self.assertEqual(setup_call.call_args, call(install_path=None, auto_accept_license=True))
+            self.assertEqual(
+                setup_call.call_args, call(install_path=None, auto_accept_license=True)
+            )
 
     def test_uninstantiable_framework(self):
         """A uninstantiable framework isn't loaded"""
         # use the string as we fake the package when loading them
-        self.assertNotIn(str(Uninstantiable).split('.')[-1],
-                         [str(type(framework)).split('.')[-1] for framework in
-                          self.CategoryHandler.main_category.frameworks.values()])
+        self.assertNotIn(
+            str(Uninstantiable).split(".")[-1],
+            [
+                str(type(framework)).split(".")[-1]
+                for framework in self.CategoryHandler.main_category.frameworks.values()
+            ],
+        )
 
     def test_inherited_from_uninstantiable_framework(self):
         """We can attach a framework which inherit from an uninstantiable one"""
         # use the string as we fake the package when loading them
-        self.assertIn(str(InheritedFromUninstantiable).split('.')[-1],
-                      [str(type(framework)).split('.')[-1] for framework in
-                       self.CategoryHandler.main_category.frameworks.values()])
+        self.assertIn(
+            str(InheritedFromUninstantiable).split(".")[-1],
+            [
+                str(type(framework)).split(".")[-1]
+                for framework in self.CategoryHandler.main_category.frameworks.values()
+            ],
+        )
 
     @patch("umake.frameworks.get_user_frameworks_path")
     def test_list_installed_default_framework(self, get_user_frameworks_path):
@@ -430,7 +588,11 @@ class TestFrameworkLoader(BaseFrameworkLoader):
         args.list = False
         args.list_available = False
         args.list_installed = True
-        self.assertTrue(get_frameworks_list_output(args).startswith("framework-a: Description for framework A"))
+        self.assertTrue(
+            get_frameworks_list_output(args).startswith(
+                "framework-a: Description for framework A"
+            )
+        )
 
     @patch("umake.frameworks.get_user_frameworks_path")
     def test_list_default_framework(self, get_user_frameworks_path):
@@ -438,7 +600,11 @@ class TestFrameworkLoader(BaseFrameworkLoader):
         args = Mock()
         args.list = True
         args.list_available = False
-        self.assertTrue(get_frameworks_list_output(args).startswith("base: Base category [not installed]"))
+        self.assertTrue(
+            get_frameworks_list_output(args).startswith(
+                "base: Base category [not installed]"
+            )
+        )
 
     @patch("umake.frameworks.get_user_frameworks_path")
     def test_list_available_default_framework(self, get_user_frameworks_path):
@@ -448,7 +614,11 @@ class TestFrameworkLoader(BaseFrameworkLoader):
         args.list_available = True
         args.list_installed = False
         print(get_frameworks_list_output(args))
-        self.assertTrue(get_frameworks_list_output(args).startswith("base: Base category [not installed]"))
+        self.assertTrue(
+            get_frameworks_list_output(args).startswith(
+                "base: Base category [not installed]"
+            )
+        )
 
 
 class TestFrameworkLoaderWithValidConfig(BaseFrameworkLoader):
@@ -458,7 +628,7 @@ class TestFrameworkLoaderWithValidConfig(BaseFrameworkLoader):
     def setUpClass(cls):
         super().setUpClass()
         sys.path.append(get_data_dir())
-        cls.testframeworks_dir = os.path.join(get_data_dir(), 'testframeworks')
+        cls.testframeworks_dir = os.path.join(get_data_dir(), "testframeworks")
 
     @classmethod
     def tearDownClass(cls):
@@ -468,28 +638,39 @@ class TestFrameworkLoaderWithValidConfig(BaseFrameworkLoader):
     def setUp(self):
         # load valid configuration
         super().setUp()
-        change_xdg_path('XDG_CONFIG_HOME', self.config_dir_for_name("valid"))
+        change_xdg_path("XDG_CONFIG_HOME", self.config_dir_for_name("valid"))
         # load custom framework-directory
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "testframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "testframeworks"):
             frameworks.load_frameworks()
         self.categoryA = self.CategoryHandler.categories["category-a"]
 
     def tearDown(self):
-        change_xdg_path('XDG_CONFIG_HOME', remove=True)
+        change_xdg_path("XDG_CONFIG_HOME", remove=True)
         super().tearDown()
 
     def test_config_override_defaults(self):
         """Configuration override defaults (explicit or implicit). If not present in config, still load default"""
         # was overridden with at load time
-        self.assertEqual(self.categoryA.frameworks["framework-a"].install_path,
-                         "/home/didrocks/quickly/ubuntu-make/adt-eclipse")
+        self.assertEqual(
+            self.categoryA.frameworks["framework-a"].install_path,
+            "/home/didrocks/quickly/ubuntu-make/adt-eclipse",
+        )
         # was default
-        self.assertEqual(self.categoryA.frameworks["framework-b"].install_path,
-                         "/home/didrocks/foo/bar/android-studio")
+        self.assertEqual(
+            self.categoryA.frameworks["framework-b"].install_path,
+            "/home/didrocks/foo/bar/android-studio",
+        )
         # isn't in the config
-        self.assertEqual(self.CategoryHandler.categories['category-c'].frameworks["framework-a"].install_path,
-                         os.path.expanduser("~/{}/category-c/framework-a".format(INSTALL_DIR)))
+        self.assertEqual(
+            self.CategoryHandler.categories["category-c"]
+            .frameworks["framework-a"]
+            .install_path,
+            os.path.expanduser("~/{}/category-c/framework-a".format(INSTALL_DIR)),
+        )
 
 
 class TestFrameworkLoaderSaveConfig(BaseFrameworkLoader):
@@ -499,7 +680,7 @@ class TestFrameworkLoaderSaveConfig(BaseFrameworkLoader):
     def setUpClass(cls):
         super().setUpClass()
         sys.path.append(get_data_dir())
-        cls.testframeworks_dir = os.path.join(get_data_dir(), 'testframeworks')
+        cls.testframeworks_dir = os.path.join(get_data_dir(), "testframeworks")
 
     @classmethod
     def tearDownClass(cls):
@@ -509,15 +690,18 @@ class TestFrameworkLoaderSaveConfig(BaseFrameworkLoader):
     def setUp(self):
         super().setUp()
         # load custom framework-directory
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "testframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "testframeworks"):
             frameworks.load_frameworks()
         self.categoryA = self.CategoryHandler.categories["category-a"]
         self.config_dir = tempfile.mkdtemp()
-        change_xdg_path('XDG_CONFIG_HOME', self.config_dir)
+        change_xdg_path("XDG_CONFIG_HOME", self.config_dir)
 
     def tearDown(self):
-        change_xdg_path('XDG_CONFIG_HOME', remove=True)
+        change_xdg_path("XDG_CONFIG_HOME", remove=True)
         shutil.rmtree(self.config_dir)
         super().tearDown()
 
@@ -526,12 +710,20 @@ class TestFrameworkLoaderSaveConfig(BaseFrameworkLoader):
         # load custom framework-directory
         self.categoryA.frameworks["framework-b"].mark_in_config()
 
-        self.assertEqual(ConfigHandler().config,
-                         {'frameworks': {
-                             'category-a': {
-                                 'framework-b': {
-                                     'path': os.path.expanduser('~/{}/category-a/framework-b'.format(INSTALL_DIR))
-                                 }}}})
+        self.assertEqual(
+            ConfigHandler().config,
+            {
+                "frameworks": {
+                    "category-a": {
+                        "framework-b": {
+                            "path": os.path.expanduser(
+                                "~/{}/category-a/framework-b".format(INSTALL_DIR)
+                            )
+                        }
+                    }
+                }
+            },
+        )
 
     def test_call_setup_save_and_then_mark_in_config_tweaked_path(self):
         """Calling mark_in_config with a custom install path save it in the configuration"""
@@ -541,44 +733,76 @@ class TestFrameworkLoaderSaveConfig(BaseFrameworkLoader):
         fw.install_path = "/home/foo/bar"
         self.categoryA.frameworks["framework-b"].mark_in_config()
 
-        self.assertEqual(ConfigHandler().config,
-                         {'frameworks': {
-                             'category-a': {
-                                 'framework-b': {'path': '/home/foo/bar'}
-                             }}})
+        self.assertEqual(
+            ConfigHandler().config,
+            {"frameworks": {"category-a": {"framework-b": {"path": "/home/foo/bar"}}}},
+        )
 
     def test_call_remove_from_config(self):
         """Calling remove_from_config remove a framework from the config"""
-        ConfigHandler().config = {'frameworks': {
-            'category-a': {
-                'framework-b': {'path': os.path.expanduser('~/{}/category-a/framework-b'.format(INSTALL_DIR))}
-            }}}
+        ConfigHandler().config = {
+            "frameworks": {
+                "category-a": {
+                    "framework-b": {
+                        "path": os.path.expanduser(
+                            "~/{}/category-a/framework-b".format(INSTALL_DIR)
+                        )
+                    }
+                }
+            }
+        }
         self.categoryA.frameworks["framework-b"].remove_from_config()
 
-        self.assertEqual(ConfigHandler().config, {'frameworks': {'category-a': {}}})
+        self.assertEqual(ConfigHandler().config, {"frameworks": {"category-a": {}}})
 
     def test_call_remove_from_config_keep_other(self):
         """Calling remove_from_config remove a framework from the config but keep others"""
-        ConfigHandler().config = {'frameworks': {
-            'category-a': {
-                'framework-b': {'path': os.path.expanduser('~/{}/category-a/framework-b'.format(INSTALL_DIR))},
-                'framework-c': {'path': os.path.expanduser('~/{}/category-a/framework-c'.format(INSTALL_DIR))}
-            },
-            'category-b': {
-                'framework-b': {'path': os.path.expanduser('~/{}/category-a/framework-b'.format(INSTALL_DIR))}
-            }}}
+        ConfigHandler().config = {
+            "frameworks": {
+                "category-a": {
+                    "framework-b": {
+                        "path": os.path.expanduser(
+                            "~/{}/category-a/framework-b".format(INSTALL_DIR)
+                        )
+                    },
+                    "framework-c": {
+                        "path": os.path.expanduser(
+                            "~/{}/category-a/framework-c".format(INSTALL_DIR)
+                        )
+                    },
+                },
+                "category-b": {
+                    "framework-b": {
+                        "path": os.path.expanduser(
+                            "~/{}/category-a/framework-b".format(INSTALL_DIR)
+                        )
+                    }
+                },
+            }
+        }
         self.categoryA.frameworks["framework-b"].remove_from_config()
 
-        self.assertEqual(ConfigHandler().config,
-                         {'frameworks': {
-                             'category-a': {
-                                 'framework-c': {
-                                     'path': os.path.expanduser('~/{}/category-a/framework-c'.format(INSTALL_DIR))
-                                 }},
-                             'category-b': {
-                                 'framework-b': {
-                                     'path': os.path.expanduser('~/{}/category-a/framework-b'.format(INSTALL_DIR))
-                                 }}}})
+        self.assertEqual(
+            ConfigHandler().config,
+            {
+                "frameworks": {
+                    "category-a": {
+                        "framework-c": {
+                            "path": os.path.expanduser(
+                                "~/{}/category-a/framework-c".format(INSTALL_DIR)
+                            )
+                        }
+                    },
+                    "category-b": {
+                        "framework-b": {
+                            "path": os.path.expanduser(
+                                "~/{}/category-a/framework-b".format(INSTALL_DIR)
+                            )
+                        }
+                    },
+                }
+            },
+        )
 
 
 class TestFrameworkLoadOnDemandLoader(BaseFrameworkLoader):
@@ -588,7 +812,7 @@ class TestFrameworkLoadOnDemandLoader(BaseFrameworkLoader):
     def setUpClass(cls):
         super().setUpClass()
         sys.path.append(get_data_dir())
-        cls.testframeworks_dir = os.path.join(get_data_dir(), 'testframeworks')
+        cls.testframeworks_dir = os.path.join(get_data_dir(), "testframeworks")
 
     @classmethod
     def tearDownClass(cls):
@@ -606,8 +830,11 @@ class TestFrameworkLoadOnDemandLoader(BaseFrameworkLoader):
 
     def loadFramework(self, framework_name):
         """Load framework name"""
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', framework_name):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", framework_name):
             frameworks.load_frameworks()
 
     def install_category_parser(self, main_parser, categories=[]):
@@ -615,128 +842,218 @@ class TestFrameworkLoadOnDemandLoader(BaseFrameworkLoader):
         categories_parser = main_parser.add_subparsers(dest="category")
         category_parsers = []
         for category in categories:
-            with patch('umake.frameworks.is_completion_mode') as completionmode_mock:
+            with patch("umake.frameworks.is_completion_mode") as completionmode_mock:
                 completionmode_mock.return_value = False
                 self.loadFramework("testframeworks")
-                category_parsers.append(self.CategoryHandler.categories[category]
-                                        .install_category_parser(categories_parser))
+                category_parsers.append(
+                    self.CategoryHandler.categories[category].install_category_parser(
+                        categories_parser
+                    )
+                )
         return category_parsers
 
     def test_arch_report_issue_framework(self):
         """Framework where we can't reach arch and having a restriction isn't installable"""
-        self.get_current_arch_mock.side_effect = BaseException('arch detection failure!')
+        self.get_current_arch_mock.side_effect = BaseException(
+            "arch detection failure!"
+        )
         self.loadFramework("testframeworks")
 
         # restricted arch framework isn't installable
-        self.assertIsNone(self.CategoryHandler.categories["category-d"].frameworks["framework-a"])
+        self.assertIsNone(
+            self.CategoryHandler.categories["category-d"].frameworks["framework-a"]
+        )
         # framework with no arch restriction but others are still installable
-        self.assertTrue(self.CategoryHandler.categories["category-d"].frameworks["framework-b"].is_installable)
+        self.assertTrue(
+            self.CategoryHandler.categories["category-d"]
+            .frameworks["framework-b"]
+            .is_installable
+        )
         # framework without any restriction is still installable
-        self.assertTrue(self.CategoryHandler.categories["category-a"].frameworks["framework-a"].is_installable)
+        self.assertTrue(
+            self.CategoryHandler.categories["category-a"]
+            .frameworks["framework-a"]
+            .is_installable
+        )
         self.expect_warn_error = True
 
     def test_version_report_issue_framework(self):
         """Framework where we can't reach version and having a restriction isn't installable"""
-        self.get_current_distro_version_mock.side_effect = BaseException('version detection failure!')
+        self.get_current_distro_version_mock.side_effect = BaseException(
+            "version detection failure!"
+        )
         self.loadFramework("testframeworks")
 
         # restricted version framework isn't installable
-        self.assertIsNone(self.CategoryHandler.categories["category-d"].frameworks["framework-b"])
+        self.assertIsNone(
+            self.CategoryHandler.categories["category-d"].frameworks["framework-b"]
+        )
         # framework with no version restriction but others are still installable
-        self.assertTrue(self.CategoryHandler.categories["category-d"].frameworks["framework-a"].is_installable)
+        self.assertTrue(
+            self.CategoryHandler.categories["category-d"]
+            .frameworks["framework-a"]
+            .is_installable
+        )
         # framework without any restriction is still installable
-        self.assertTrue(self.CategoryHandler.categories["category-a"].frameworks["framework-a"].is_installable)
+        self.assertTrue(
+            self.CategoryHandler.categories["category-a"]
+            .frameworks["framework-a"]
+            .is_installable
+        )
         self.expect_warn_error = True
 
     def test_check_not_installed_wrong_requirements(self):
         """Framework isn't installed if path and package requirements aren't met"""
-        with patch('umake.frameworks.RequirementsHandler') as requirement_mock:
+        with patch("umake.frameworks.RequirementsHandler") as requirement_mock:
             requirement_mock.return_value.is_bucket_installed.return_value = False
             self.loadFramework("testframeworks")
-            self.assertFalse(self.CategoryHandler.categories["category-f"].frameworks["framework-c"].is_installed)
-            requirement_mock.return_value.is_bucket_installed.assert_called_with(['foo', 'bar'])
+            self.assertFalse(
+                self.CategoryHandler.categories["category-f"]
+                .frameworks["framework-c"]
+                .is_installed
+            )
+            requirement_mock.return_value.is_bucket_installed.assert_called_with(
+                ["foo", "bar"]
+            )
             # is_bucket_available is called when it's not installed
-            requirement_mock.return_value.is_bucket_available.assert_has_calls([call(['foo', 'bar'])])
+            requirement_mock.return_value.is_bucket_available.assert_has_calls(
+                [call(["foo", "bar"])]
+            )
 
     def test_check_installed_with_matched_requirements(self):
         """Framework is installed if path and package requirements are met"""
-        with patch('umake.frameworks.RequirementsHandler') as requirement_mock:
+        with patch("umake.frameworks.RequirementsHandler") as requirement_mock:
             requirement_mock.return_value.is_bucket_installed.return_value = True
             self.loadFramework("testframeworks")
-            self.assertTrue(self.CategoryHandler.categories["category-f"].frameworks["framework-c"].is_installed)
-            requirement_mock.return_value.is_bucket_installed.assert_called_with(['foo', 'bar'])
+            self.assertTrue(
+                self.CategoryHandler.categories["category-f"]
+                .frameworks["framework-c"]
+                .is_installed
+            )
+            requirement_mock.return_value.is_bucket_installed.assert_called_with(
+                ["foo", "bar"]
+            )
             # we don't call is_bucket_available if requirements are met
-            self.assertFalse(call(['foo', 'bar']) in requirement_mock.return_value.is_bucket_available.call_args_list)
+            self.assertFalse(
+                call(["foo", "bar"])
+                in requirement_mock.return_value.is_bucket_available.call_args_list
+            )
 
     def test_check_requirements_inherited_from_category(self):
         """Framework without package requirements are inherited from category"""
-        with patch('umake.frameworks.RequirementsHandler') as requirement_mock:
+        with patch("umake.frameworks.RequirementsHandler") as requirement_mock:
             self.loadFramework("testframeworks")
-            self.assertEqual(self.CategoryHandler.categories["category-g"].frameworks["framework-b"]
-                             .packages_requirements, ["baz"])
+            self.assertEqual(
+                self.CategoryHandler.categories["category-g"]
+                .frameworks["framework-b"]
+                .packages_requirements,
+                ["baz"],
+            )
 
     def test_check_requirements_from_category_merge_into_exiting(self):
         """Framework with package requirements merged them from the associated category"""
-        with patch('umake.frameworks.RequirementsHandler') as requirement_mock:
+        with patch("umake.frameworks.RequirementsHandler") as requirement_mock:
             self.loadFramework("testframeworks")
-            self.assertEqual(self.CategoryHandler.categories["category-g"].frameworks["framework-a"]
-                             .packages_requirements, ["buz", "biz", "baz"])
+            self.assertEqual(
+                self.CategoryHandler.categories["category-g"]
+                .frameworks["framework-a"]
+                .packages_requirements,
+                ["buz", "biz", "baz"],
+            )
 
     def test_root_needed_if_not_matched_requirements(self):
         """Framework with unmatched requirements need root access"""
-        with patch('umake.frameworks.RequirementsHandler') as requirement_mock:
+        with patch("umake.frameworks.RequirementsHandler") as requirement_mock:
             requirement_mock.return_value.is_bucket_installed.return_value = False
             self.loadFramework("testframeworks")
-            self.assertTrue(self.CategoryHandler.categories["category-f"].frameworks["framework-c"].need_root_access)
+            self.assertTrue(
+                self.CategoryHandler.categories["category-f"]
+                .frameworks["framework-c"]
+                .need_root_access
+            )
 
     def test_no_root_needed_if_matched_requirements_even_uninstalled(self):
         """Framework which are uninstalled but with matched requirements doesn't need root access"""
-        with patch('umake.frameworks.RequirementsHandler') as requirement_mock:
+        with patch("umake.frameworks.RequirementsHandler") as requirement_mock:
             requirement_mock.return_value.is_bucket_installed.return_value = True
             self.loadFramework("testframeworks")
             # ensure the framework isn't installed, but the bucket being installed, we don't need root access
-            self.assertFalse(self.CategoryHandler.categories["category-f"].frameworks["framework-a"].is_installed)
-            self.assertFalse(self.CategoryHandler.categories["category-f"].frameworks["framework-a"].need_root_access)
+            self.assertFalse(
+                self.CategoryHandler.categories["category-f"]
+                .frameworks["framework-a"]
+                .is_installed
+            )
+            self.assertFalse(
+                self.CategoryHandler.categories["category-f"]
+                .frameworks["framework-a"]
+                .need_root_access
+            )
 
     def test_root_needed_setup_call_root(self):
         """Framework with root access needed call sudo"""
-        with patch('umake.frameworks.subprocess') as subprocess_mock,\
-                patch.object(umake.frameworks.os, 'geteuid', return_value=1000) as geteuid,\
-                patch('umake.frameworks.MainLoop') as mainloop_mock,\
-                patch('umake.frameworks.RequirementsHandler') as requirement_mock:
+        with patch("umake.frameworks.subprocess") as subprocess_mock, patch.object(
+            umake.frameworks.os, "geteuid", return_value=1000
+        ) as geteuid, patch("umake.frameworks.MainLoop") as mainloop_mock, patch(
+            "umake.frameworks.RequirementsHandler"
+        ) as requirement_mock:
             requirement_mock.return_value.is_bucket_installed.return_value = False
             self.loadFramework("testframeworks")
-            self.assertTrue(self.CategoryHandler.categories["category-f"].frameworks["framework-c"].need_root_access)
-            self.CategoryHandler.categories["category-f"].frameworks["framework-c"].setup()
+            self.assertTrue(
+                self.CategoryHandler.categories["category-f"]
+                .frameworks["framework-c"]
+                .need_root_access
+            )
+            self.CategoryHandler.categories["category-f"].frameworks[
+                "framework-c"
+            ].setup()
 
             self.assertEqual(subprocess_mock.call.call_args[0][0][0], "sudo")
             self.assertTrue(mainloop_mock.return_value.quit.called)
 
     def test_no_root_needed_setup_doesnt_call_root(self):
         """Framework without root access needed don't call sudo"""
-        with patch('umake.frameworks.subprocess') as subprocess_mock,\
-                patch.object(umake.frameworks.os, 'geteuid', return_value=1000) as geteuid,\
-                patch.object(umake.frameworks.sys, 'exit', return_value=True) as sys_exit_mock,\
-                patch('umake.frameworks.RequirementsHandler') as requirement_mock:
+        with patch("umake.frameworks.subprocess") as subprocess_mock, patch.object(
+            umake.frameworks.os, "geteuid", return_value=1000
+        ) as geteuid, patch.object(
+            umake.frameworks.sys, "exit", return_value=True
+        ) as sys_exit_mock, patch(
+            "umake.frameworks.RequirementsHandler"
+        ) as requirement_mock:
             requirement_mock.return_value.is_bucket_installed.return_value = True
             self.loadFramework("testframeworks")
-            self.assertFalse(self.CategoryHandler.categories["category-f"].frameworks["framework-c"].need_root_access)
-            self.CategoryHandler.categories["category-f"].frameworks["framework-c"].setup()
+            self.assertFalse(
+                self.CategoryHandler.categories["category-f"]
+                .frameworks["framework-c"]
+                .need_root_access
+            )
+            self.CategoryHandler.categories["category-f"].frameworks[
+                "framework-c"
+            ].setup()
 
             self.assertFalse(subprocess_mock.call.called)
             self.assertFalse(sys_exit_mock.called)
 
     def test_root_needed_setup_doesnt_call_root(self):
         """setup doesn't call sudo if we are already root"""
-        with patch('umake.frameworks.subprocess') as subprocess_mock,\
-                patch.object(umake.frameworks.sys, 'exit', return_value=True) as sys_exit_mock,\
-                patch.object(umake.frameworks.os, 'geteuid', return_value=0) as geteuid,\
-                patch('umake.frameworks.RequirementsHandler') as requirement_mock,\
-                patch('umake.frameworks.switch_to_current_user') as switch_to_current_use_mock:
+        with patch("umake.frameworks.subprocess") as subprocess_mock, patch.object(
+            umake.frameworks.sys, "exit", return_value=True
+        ) as sys_exit_mock, patch.object(
+            umake.frameworks.os, "geteuid", return_value=0
+        ) as geteuid, patch(
+            "umake.frameworks.RequirementsHandler"
+        ) as requirement_mock, patch(
+            "umake.frameworks.switch_to_current_user"
+        ) as switch_to_current_use_mock:
             requirement_mock.return_value.is_bucket_installed.return_value = False
             self.loadFramework("testframeworks")
-            self.assertTrue(self.CategoryHandler.categories["category-f"].frameworks["framework-c"].need_root_access)
-            self.CategoryHandler.categories["category-f"].frameworks["framework-c"].setup()
+            self.assertTrue(
+                self.CategoryHandler.categories["category-f"]
+                .frameworks["framework-c"]
+                .need_root_access
+            )
+            self.CategoryHandler.categories["category-f"].frameworks[
+                "framework-c"
+            ].setup()
 
             self.assertFalse(subprocess_mock.call.called)
             self.assertFalse(sys_exit_mock.called)
@@ -747,49 +1064,65 @@ class TestFrameworkLoadOnDemandLoader(BaseFrameworkLoader):
         """Completion mode bypass expensive calls and so, register all frameworks but those marked as only for removal
 
         (so read config)"""
-        with patch('umake.frameworks.ConfigHandler') as config_handler_mock,\
-                patch('umake.frameworks.RequirementsHandler') as requirementhandler_mock,\
-                patch('umake.frameworks.is_completion_mode') as completionmode_mock:
+        with patch("umake.frameworks.ConfigHandler") as config_handler_mock, patch(
+            "umake.frameworks.RequirementsHandler"
+        ) as requirementhandler_mock, patch(
+            "umake.frameworks.is_completion_mode"
+        ) as completionmode_mock:
             completionmode_mock.return_value = True
             self.loadFramework("testframeworks")
 
             self.assertTrue(completionmode_mock.called)
-            self.assertFalse(requirementhandler_mock.return_value.is_bucket_installed.called)
+            self.assertFalse(
+                requirementhandler_mock.return_value.is_bucket_installed.called
+            )
             # test that a non installed framework is registered
-            self.assertIsNotNone(self.CategoryHandler.categories["category-e"].frameworks["framework-c"])
+            self.assertIsNotNone(
+                self.CategoryHandler.categories["category-e"].frameworks["framework-c"]
+            )
 
     def test_use_expensive_calls_when_not_in_completion_mode(self):
         """Non completion mode have expensive calls and don't register all frameworks"""
-        with patch('umake.frameworks.ConfigHandler') as config_handler_mock,\
-                patch('umake.frameworks.RequirementsHandler') as requirementhandler_mock,\
-                patch('umake.frameworks.is_completion_mode') as completionmode_mock:
+        with patch("umake.frameworks.ConfigHandler") as config_handler_mock, patch(
+            "umake.frameworks.RequirementsHandler"
+        ) as requirementhandler_mock, patch(
+            "umake.frameworks.is_completion_mode"
+        ) as completionmode_mock:
             completionmode_mock.return_value = False
             self.loadFramework("testframeworks")
 
             self.assertTrue(completionmode_mock.called)
-            self.assertTrue(len(config_handler_mock.return_value.config.mock_calls) > 0,
-                            str(config_handler_mock.return_value.config.mock_calls))
-            self.assertTrue(requirementhandler_mock.return_value.is_bucket_installed.called)
+            self.assertTrue(
+                len(config_handler_mock.return_value.config.mock_calls) > 0,
+                str(config_handler_mock.return_value.config.mock_calls),
+            )
+            self.assertTrue(
+                requirementhandler_mock.return_value.is_bucket_installed.called
+            )
             # test that a non installed framework is registered
-            self.assertIsNone(self.CategoryHandler.categories["category-e"].frameworks["framework-c"])
+            self.assertIsNone(
+                self.CategoryHandler.categories["category-e"].frameworks["framework-c"]
+            )
 
     def test_install_category_and_framework_parsers(self):
         """Install category and framework parsers contains works"""
         main_parser = argparse.ArgumentParser()
         categories_parser = main_parser.add_subparsers()
-        with patch('umake.frameworks.is_completion_mode') as completionmode_mock:
+        with patch("umake.frameworks.is_completion_mode") as completionmode_mock:
             completionmode_mock.return_value = False
             self.loadFramework("testframeworks")
-            category_parser = self.CategoryHandler.categories['category-a'].install_category_parser(categories_parser)
+            category_parser = self.CategoryHandler.categories[
+                "category-a"
+            ].install_category_parser(categories_parser)
 
-            self.assertTrue('category-a' in categories_parser.choices)
-            self.assertTrue('framework-a' in category_parser.choices)
-            self.assertTrue('framework-b' in category_parser.choices)
+            self.assertTrue("category-a" in categories_parser.choices)
+            self.assertTrue("framework-a" in category_parser.choices)
+            self.assertTrue("framework-b" in category_parser.choices)
 
     def test_parse_category_and_framework(self):
         """Parsing category and framework return right category and framework"""
         main_parser = argparse.ArgumentParser()
-        self.install_category_parser(main_parser, ['category-a'])
+        self.install_category_parser(main_parser, ["category-a"])
         args = main_parser.parse_args(["category-a", "framework-a"])
         self.assertEqual(args.category, "category-a")
         self.assertEqual(args.framework, "framework-a")
@@ -798,7 +1131,7 @@ class TestFrameworkLoadOnDemandLoader(BaseFrameworkLoader):
     def test_parse_framework(self):
         """Parsing framework get default parser framework options"""
         main_parser = argparse.ArgumentParser()
-        self.install_category_parser(main_parser, ['category-a'])
+        self.install_category_parser(main_parser, ["category-a"])
         args = main_parser.parse_args(["category-a", "framework-a"])
         self.assertEqual(args.category, "category-a")
         self.assertEqual(args.framework, "framework-a")
@@ -810,7 +1143,7 @@ class TestFrameworkLoadOnDemandLoader(BaseFrameworkLoader):
     def test_parse_framework_with_optional_accept_license(self):
         """Parsing framework with optional auto accept license argument"""
         main_parser = argparse.ArgumentParser()
-        self.install_category_parser(main_parser, ['category-a'])
+        self.install_category_parser(main_parser, ["category-a"])
         args = main_parser.parse_args(["category-a", "framework-b", "--accept-license"])
         self.assertEqual(args.category, "category-a")
         self.assertEqual(args.framework, "framework-b")
@@ -820,51 +1153,61 @@ class TestFrameworkLoadOnDemandLoader(BaseFrameworkLoader):
 
     def test_parse_invalid_categories_raise_exit_error(self):
         """Invalid categories parse requests exit"""
+
         def error_without_message(x):
             raise SystemExit()
+
         main_parser = argparse.ArgumentParser()
         main_parser.print_usage = lambda x: ""
         main_parser.error = error_without_message
         self.install_category_parser(main_parser, [])
 
-        self.assertRaises(SystemExit, main_parser.parse_args, ["category-a", "framework-a"])
+        self.assertRaises(
+            SystemExit, main_parser.parse_args, ["category-a", "framework-a"]
+        )
 
     def test_parse_invalid_frameworks_return_error(self):
         """Invalid framework parse requests exit"""
+
         def error_without_message(x):
             raise SystemExit()
+
         main_parser = argparse.ArgumentParser()
         self.install_category_parser(main_parser, ["category-a"])
         category_parser = main_parser._actions[1].choices["category-a"]
         category_parser.print_usage = lambda x: ""
         category_parser.error = error_without_message
 
-        self.assertRaises(SystemExit, main_parser.parse_args, ["category-a", "framework-aa"])
+        self.assertRaises(
+            SystemExit, main_parser.parse_args, ["category-a", "framework-aa"]
+        )
 
     def test_parse_no_category_return_empty_namespace(self):
         """No category or framework returns an empty namespace"""
         main_parser = argparse.ArgumentParser()
-        self.install_category_parser(main_parser, ['category-a'])
+        self.install_category_parser(main_parser, ["category-a"])
         self.assertEqual(main_parser.parse_args([]), argparse.Namespace(category=None))
 
     def test_install_category_with_no_framework(self):
         """Install category with no framework returns None"""
         main_parser = argparse.ArgumentParser()
-        self.assertEqual(self.install_category_parser(main_parser, ['empty-category']), [None])
+        self.assertEqual(
+            self.install_category_parser(main_parser, ["empty-category"]), [None]
+        )
 
     def test_install_main_category(self):
         """Main category install directly at root of the parser"""
         main_parser = argparse.ArgumentParser()
-        main_cat_parser = self.install_category_parser(main_parser, ['main'])[0]
+        main_cat_parser = self.install_category_parser(main_parser, ["main"])[0]
 
-        self.assertTrue('framework-free---b' in main_cat_parser.choices)
-        self.assertTrue('framework-free-a' in main_cat_parser.choices)
-        self.assertFalse('framework-a' in main_cat_parser.choices)
+        self.assertTrue("framework-free---b" in main_cat_parser.choices)
+        self.assertTrue("framework-free-a" in main_cat_parser.choices)
+        self.assertFalse("framework-a" in main_cat_parser.choices)
 
     def test_parse_main_category(self):
         """Main category elements can be directly accessed"""
         main_parser = argparse.ArgumentParser()
-        self.install_category_parser(main_parser, ['main'])
+        self.install_category_parser(main_parser, ["main"])
         args = main_parser.parse_args(["framework-free-a"])
         self.assertEqual(args.category, "framework-free-a")
         self.assertEqual(args.destdir, None)
@@ -873,10 +1216,14 @@ class TestFrameworkLoadOnDemandLoader(BaseFrameworkLoader):
     def test_run_framework_in_main_category(self):
         """Frameworks command from main category can be run as usual"""
         main_parser = argparse.ArgumentParser()
-        self.install_category_parser(main_parser, ['main'])
+        self.install_category_parser(main_parser, ["main"])
         args = main_parser.parse_args(["framework-free-a"])
-        with patch.object(self.CategoryHandler.main_category.frameworks["framework-free-a"], "setup") as setup_call:
-            self.CategoryHandler.main_category.frameworks["framework-free-a"].run_for(args)
+        with patch.object(
+            self.CategoryHandler.main_category.frameworks["framework-free-a"], "setup"
+        ) as setup_call:
+            self.CategoryHandler.main_category.frameworks["framework-free-a"].run_for(
+                args
+            )
             self.assertTrue(setup_call.called)
 
 
@@ -887,7 +1234,9 @@ class TestEmptyFrameworkLoader(BaseFrameworkLoader):
     def setUpClass(cls):
         super().setUpClass()
         sys.path.append(get_data_dir())
-        cls.testframeworks_dir = os.path.join(get_data_dir(), 'testframeworksdoesntexist')
+        cls.testframeworks_dir = os.path.join(
+            get_data_dir(), "testframeworksdoesntexist"
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -897,16 +1246,26 @@ class TestEmptyFrameworkLoader(BaseFrameworkLoader):
     def setUp(self):
         super().setUp()
         # load custom unexisting framework-directory
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "testframeworksdoesntexist"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "testframeworksdoesntexist"):
             frameworks.load_frameworks()
 
     def test_invalid_framework(self):
         """There is one main category, but nothing else"""
-        main_category = [category for category in self.CategoryHandler.categories.values()
-                         if category.is_main_category][0]
+        main_category = [
+            category
+            for category in self.CategoryHandler.categories.values()
+            if category.is_main_category
+        ][0]
         self.assertEqual(self.CategoryHandler.main_category, main_category)
-        self.assertEqual(len(self.CategoryHandler.categories), 1, str(self.CategoryHandler.categories))
+        self.assertEqual(
+            len(self.CategoryHandler.categories),
+            1,
+            str(self.CategoryHandler.categories),
+        )
 
     def test_listing_empty_framework(self):
         """List the correct empty items"""
@@ -925,7 +1284,7 @@ class TestDuplicatedFrameworkLoader(BaseFrameworkLoader):
     def setUpClass(cls):
         super().setUpClass()
         sys.path.append(get_data_dir())
-        cls.testframeworks_dir = os.path.join(get_data_dir(), 'duplicatedframeworks')
+        cls.testframeworks_dir = os.path.join(get_data_dir(), "duplicatedframeworks")
 
     @classmethod
     def tearDownClass(cls):
@@ -934,26 +1293,42 @@ class TestDuplicatedFrameworkLoader(BaseFrameworkLoader):
 
     def setUp(self):
         super().setUp()
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "duplicatedframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "duplicatedframeworks"):
             frameworks.load_frameworks()
         self.categoryA = self.CategoryHandler.categories["category-a"]
-        self.expect_warn_error = True  # as we load multiple duplicate categories and frameworks
+        self.expect_warn_error = (
+            True  # as we load multiple duplicate categories and frameworks
+        )
 
     def test_duplicated_categories(self):
         """We only load one category when a second with same name is met"""
         # main + categoryA
-        self.assertEqual(len(self.CategoryHandler.categories), 2, str(self.CategoryHandler.categories))
-        self.assertEqual(self.CategoryHandler.categories["category-a"].name, "Category A")
+        self.assertEqual(
+            len(self.CategoryHandler.categories),
+            2,
+            str(self.CategoryHandler.categories),
+        )
+        self.assertEqual(
+            self.CategoryHandler.categories["category-a"].name, "Category A"
+        )
 
     def test_duplicated_frameworks(self):
         """We only load one framework when a second with the same name is met"""
-        self.assertEqual(len(self.categoryA.frameworks), 1, str(self.categoryA.frameworks))
+        self.assertEqual(
+            len(self.categoryA.frameworks), 1, str(self.categoryA.frameworks)
+        )
 
     def test_main_category_empty(self):
         """The main category (unused here) is empty by default"""
-        self.assertEqual(len(self.CategoryHandler.main_category.frameworks), 0,
-                         str(self.CategoryHandler.main_category.frameworks))
+        self.assertEqual(
+            len(self.CategoryHandler.main_category.frameworks),
+            0,
+            str(self.CategoryHandler.main_category.frameworks),
+        )
 
 
 class TestMultipleDefaultFrameworkLoader(BaseFrameworkLoader):
@@ -963,7 +1338,9 @@ class TestMultipleDefaultFrameworkLoader(BaseFrameworkLoader):
     def setUpClass(cls):
         super().setUpClass()
         sys.path.append(get_data_dir())
-        cls.testframeworks_dir = os.path.join(get_data_dir(), 'multipledefaultsframeworks')
+        cls.testframeworks_dir = os.path.join(
+            get_data_dir(), "multipledefaultsframeworks"
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -972,27 +1349,35 @@ class TestMultipleDefaultFrameworkLoader(BaseFrameworkLoader):
 
     def setUp(self):
         super().setUp()
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "multipledefaultsframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "multipledefaultsframeworks"):
             frameworks.load_frameworks()
         self.categoryA = self.CategoryHandler.categories["category-a"]
-        self.expect_warn_error = True  # as we load multiple default frameworks in a category
+        self.expect_warn_error = (
+            True  # as we load multiple default frameworks in a category
+        )
 
     def test_multiple_defaults(self):
         """Setting multiple defaults frameworks to a category should void any default"""
         self.assertIsNone(self.categoryA.default_framework)
-        self.assertEqual(len(self.categoryA.frameworks), 2,
-                         str(self.categoryA.frameworks))  # ensure they are still loaded
+        self.assertEqual(
+            len(self.categoryA.frameworks), 2, str(self.categoryA.frameworks)
+        )  # ensure they are still loaded
 
     def test_one_default_in_main_category(self):
         """Reject default framework for main category"""
         self.assertIsNone(self.CategoryHandler.main_category.default_framework)
-        self.assertEqual(len(self.CategoryHandler.main_category.frameworks), 1,
-                         str(self.CategoryHandler.main_category.frameworks))  # ensure it's still loaded
+        self.assertEqual(
+            len(self.CategoryHandler.main_category.frameworks),
+            1,
+            str(self.CategoryHandler.main_category.frameworks),
+        )  # ensure it's still loaded
 
 
 class TestNotLoadedFrameworkLoader(BaseFrameworkLoader):
-
     def setUp(self):
         super().setUp()
         self.CategoryHandler = frameworks.BaseCategory
@@ -1003,7 +1388,11 @@ class TestNotLoadedFrameworkLoader(BaseFrameworkLoader):
 
     def test_get_with_no_category(self):
         """categories is empty when there is no category loaded"""
-        self.assertEqual(len(self.CategoryHandler.categories), 0, str(self.CategoryHandler.categories))
+        self.assertEqual(
+            len(self.CategoryHandler.categories),
+            0,
+            str(self.CategoryHandler.categories),
+        )
 
 
 class TestAbstractFrameworkLoader(BaseFrameworkLoader):
@@ -1013,7 +1402,7 @@ class TestAbstractFrameworkLoader(BaseFrameworkLoader):
     def setUpClass(cls):
         super().setUpClass()
         sys.path.append(get_data_dir())
-        cls.testframeworks_dir = os.path.join(get_data_dir(), 'abstractframeworks')
+        cls.testframeworks_dir = os.path.join(get_data_dir(), "abstractframeworks")
 
     @classmethod
     def tearDownClass(cls):
@@ -1023,8 +1412,11 @@ class TestAbstractFrameworkLoader(BaseFrameworkLoader):
     def setUp(self):
         super().setUp()
         # load custom unexisting framework-directory
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "abstractframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "abstractframeworks"):
             frameworks.load_frameworks()
         self.categoryA = self.CategoryHandler.categories["category-a"]
 
@@ -1041,7 +1433,7 @@ class TestInvalidFrameworksLoader(BaseFrameworkLoader):
     def setUpClass(cls):
         super().setUpClass()
         sys.path.append(get_data_dir())
-        cls.testframeworks_dir = os.path.join(get_data_dir(), 'invalidframeworks')
+        cls.testframeworks_dir = os.path.join(get_data_dir(), "invalidframeworks")
 
     @classmethod
     def tearDownClass(cls):
@@ -1050,63 +1442,103 @@ class TestInvalidFrameworksLoader(BaseFrameworkLoader):
 
     def test_invalid_framework_loading(self):
         """Frameworks that don't have a Framework type aren't loaded"""
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "invalidframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "invalidframeworks"):
             frameworks.load_frameworks()
-        self.assertEqual(len(self.CategoryHandler.categories["category-a"].frameworks), 0,
-                         self.CategoryHandler.categories["category-a"].frameworks)
+        self.assertEqual(
+            len(self.CategoryHandler.categories["category-a"].frameworks),
+            0,
+            self.CategoryHandler.categories["category-a"].frameworks,
+        )
 
     @patch("umake.frameworks.get_user_frameworks_path")
     def test_list_installed_single_framework(self, get_user_frameworks_path):
         """List the correct installed items in single framework"""
         with tempfile.TemporaryDirectory() as temp_path:
-            shutil.copy(os.path.join(get_data_dir(), "overlayframeworks", "overlayframeworks.py"), temp_path)
+            shutil.copy(
+                os.path.join(
+                    get_data_dir(), "overlayframeworks", "overlayframeworks.py"
+                ),
+                temp_path,
+            )
             get_user_frameworks_path.return_value = temp_path
             # load home framework-directory
-            with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                    patchelem(umake.frameworks, '__package__', "invalidframeworks"):
+            with patchelem(
+                umake.frameworks,
+                "__file__",
+                os.path.join(self.testframeworks_dir, "__init__.py"),
+            ), patchelem(umake.frameworks, "__package__", "invalidframeworks"):
                 frameworks.load_frameworks()
 
             args = Mock()
             args.list = False
             args.list_available = False
             args.list_installed = True
-            self.assertTrue(get_frameworks_list_output(args).startswith("No frameworks are currently installed"))
+            self.assertTrue(
+                get_frameworks_list_output(args).startswith(
+                    "No frameworks are currently installed"
+                )
+            )
 
     @patch("umake.frameworks.get_user_frameworks_path")
     def test_list_single_framework(self, get_user_frameworks_path):
         """List the correct items in single framework"""
         with tempfile.TemporaryDirectory() as temp_path:
-            shutil.copy(os.path.join(get_data_dir(), "overlayframeworks", "overlayframeworks.py"), temp_path)
+            shutil.copy(
+                os.path.join(
+                    get_data_dir(), "overlayframeworks", "overlayframeworks.py"
+                ),
+                temp_path,
+            )
             get_user_frameworks_path.return_value = temp_path
             # load home framework-directory
-            with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                    patchelem(umake.frameworks, '__package__', "invalidframeworks"):
+            with patchelem(
+                umake.frameworks,
+                "__file__",
+                os.path.join(self.testframeworks_dir, "__init__.py"),
+            ), patchelem(umake.frameworks, "__package__", "invalidframeworks"):
                 frameworks.load_frameworks()
 
             args = Mock()
             args.list = True
             args.list_available = False
-            self.assertTrue(get_frameworks_list_output(args).startswith(
-                "category-a: Category A description [not installed]"))
+            self.assertTrue(
+                get_frameworks_list_output(args).startswith(
+                    "category-a: Category A description [not installed]"
+                )
+            )
 
     @patch("umake.frameworks.get_user_frameworks_path")
     def test_list_available_single_framework(self, get_user_frameworks_path):
         """List the correct available items in single framework"""
         with tempfile.TemporaryDirectory() as temp_path:
-            shutil.copy(os.path.join(get_data_dir(), "overlayframeworks", "overlayframeworks.py"), temp_path)
+            shutil.copy(
+                os.path.join(
+                    get_data_dir(), "overlayframeworks", "overlayframeworks.py"
+                ),
+                temp_path,
+            )
             get_user_frameworks_path.return_value = temp_path
             # load home framework-directory
-            with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                    patchelem(umake.frameworks, '__package__', "invalidframeworks"):
+            with patchelem(
+                umake.frameworks,
+                "__file__",
+                os.path.join(self.testframeworks_dir, "__init__.py"),
+            ), patchelem(umake.frameworks, "__package__", "invalidframeworks"):
                 frameworks.load_frameworks()
 
             args = Mock()
             args.list = False
             args.list_available = True
             args.list_installed = False
-            self.assertTrue(get_frameworks_list_output(args).startswith(
-                "category-a: Category A description [not installed]"))
+            self.assertTrue(
+                get_frameworks_list_output(args).startswith(
+                    "category-a: Category A description [not installed]"
+                )
+            )
 
 
 class TestFrameworkLoaderCustom(BaseFrameworkLoader):
@@ -1116,7 +1548,7 @@ class TestFrameworkLoaderCustom(BaseFrameworkLoader):
     def setUpClass(cls):
         super().setUpClass()
         sys.path.append(get_data_dir())
-        cls.testframeworks_dir = os.path.join(get_data_dir(), 'testframeworks')
+        cls.testframeworks_dir = os.path.join(get_data_dir(), "testframeworks")
 
     @classmethod
     def tearDownClass(cls):
@@ -1146,114 +1578,197 @@ class TestFrameworkLoaderCustom(BaseFrameworkLoader):
         """Ensure we load additional frameworks from home directory"""
         temp_path = tempfile.mkdtemp()
         self.dirs_to_remove.append(temp_path)
-        shutil.copy(os.path.join(get_data_dir(), "overlayframeworks", "overlayframeworks.py"), temp_path)
+        shutil.copy(
+            os.path.join(get_data_dir(), "overlayframeworks", "overlayframeworks.py"),
+            temp_path,
+        )
         get_user_frameworks_path.return_value = temp_path
         # load home framework-directory
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "testframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "testframeworks"):
             frameworks.load_frameworks()
 
         # ensure that the overlay is loaded
-        self.assertEqual(self.CategoryHandler.categories["category-a-overlay"].name, "Category A overlay")
+        self.assertEqual(
+            self.CategoryHandler.categories["category-a-overlay"].name,
+            "Category A overlay",
+        )
         # ensure that the other frameworks are still loaded
-        self.assertEqual(self.CategoryHandler.categories["category-a"].name, "Category A")
+        self.assertEqual(
+            self.CategoryHandler.categories["category-a"].name, "Category A"
+        )
 
     def test_load_additional_frameworks_with_env_var(self):
         """Ensure we load additional frameworks set in an environment variable"""
         temp_path = tempfile.mkdtemp()
         self.dirs_to_remove.append(temp_path)
         os.environ[UMAKE_FRAMEWORKS_ENVIRON_VARIABLE] = temp_path
-        shutil.copy(os.path.join(get_data_dir(), "overlayframeworks", "overlayframeworks.py"), temp_path)
+        shutil.copy(
+            os.path.join(get_data_dir(), "overlayframeworks", "overlayframeworks.py"),
+            temp_path,
+        )
         # load env framework-directory
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "testframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "testframeworks"):
             frameworks.load_frameworks()
 
         # ensure that the overlay is loaded
-        self.assertEqual(self.CategoryHandler.categories["category-a-overlay"].name, "Category A overlay")
+        self.assertEqual(
+            self.CategoryHandler.categories["category-a-overlay"].name,
+            "Category A overlay",
+        )
         # ensure that the other frameworks are still loaded
-        self.assertEqual(self.CategoryHandler.categories["category-a"].name, "Category A")
+        self.assertEqual(
+            self.CategoryHandler.categories["category-a"].name, "Category A"
+        )
 
     @patch("umake.frameworks.get_user_frameworks_path")
-    def test_load_additional_frameworks_with_two_categories(self, get_user_frameworks_path):
+    def test_load_additional_frameworks_with_two_categories(
+        self, get_user_frameworks_path
+    ):
         """Ensure we load additional frameworks in a path with two categories"""
         temp_path = tempfile.mkdtemp()
         self.dirs_to_remove.append(temp_path)
-        shutil.copy(os.path.join(get_data_dir(), "overlayframeworks", "overlayframeworks.py"), temp_path)
-        shutil.copy(os.path.join(get_data_dir(), "overlayframeworks", "withcategory2.py"), temp_path)
+        shutil.copy(
+            os.path.join(get_data_dir(), "overlayframeworks", "overlayframeworks.py"),
+            temp_path,
+        )
+        shutil.copy(
+            os.path.join(get_data_dir(), "overlayframeworks", "withcategory2.py"),
+            temp_path,
+        )
         get_user_frameworks_path.return_value = temp_path
         # load home framework-directory
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "testframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "testframeworks"):
             frameworks.load_frameworks()
 
         # ensure that both overlay are loaded
-        self.assertEqual(self.CategoryHandler.categories["category-a-overlay"].name, "Category A overlay")
-        self.assertEqual(self.CategoryHandler.categories["category-a2-overlay"].name, "Category A2 overlay")
+        self.assertEqual(
+            self.CategoryHandler.categories["category-a-overlay"].name,
+            "Category A overlay",
+        )
+        self.assertEqual(
+            self.CategoryHandler.categories["category-a2-overlay"].name,
+            "Category A2 overlay",
+        )
         # ensure that the other frameworks are still loaded
-        self.assertEqual(self.CategoryHandler.categories["category-a"].name, "Category A")
+        self.assertEqual(
+            self.CategoryHandler.categories["category-a"].name, "Category A"
+        )
 
     @patch("umake.frameworks.get_user_frameworks_path")
-    def test_load_additional_frameworks_with_same_filename(self, get_user_frameworks_path):
+    def test_load_additional_frameworks_with_same_filename(
+        self, get_user_frameworks_path
+    ):
         """Ensure we load additional frameworks in a path with same filename"""
         temp_path = tempfile.mkdtemp()
         self.dirs_to_remove.append(temp_path)
-        shutil.copy(os.path.join(get_data_dir(), "overlayframeworks", "withcategory.py"), temp_path)
+        shutil.copy(
+            os.path.join(get_data_dir(), "overlayframeworks", "withcategory.py"),
+            temp_path,
+        )
         get_user_frameworks_path.return_value = temp_path
         # load home framework-directory
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "testframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "testframeworks"):
             frameworks.load_frameworks()
 
         # ensure that the duplicated filename (but not category) is loaded
-        self.assertEqual(self.CategoryHandler.categories["category-a-overlay"].name, "Category A overlay")
+        self.assertEqual(
+            self.CategoryHandler.categories["category-a-overlay"].name,
+            "Category A overlay",
+        )
         # ensure that the other frameworks with the same name is still loaded
-        self.assertEqual(self.CategoryHandler.categories["category-a"].name, "Category A")
+        self.assertEqual(
+            self.CategoryHandler.categories["category-a"].name, "Category A"
+        )
 
     @patch("umake.frameworks.get_user_frameworks_path")
-    def test_load_additional_frameworks_with_duphome_before_system(self, get_user_frameworks_path):
+    def test_load_additional_frameworks_with_duphome_before_system(
+        self, get_user_frameworks_path
+    ):
         """Ensure we load additional frameworks from home before system if they have the same names"""
         temp_path = tempfile.mkdtemp()
         self.dirs_to_remove.append(temp_path)
-        shutil.copy(os.path.join(get_data_dir(), "overlayframeworks", "duplicatedcategory.py"), temp_path)
+        shutil.copy(
+            os.path.join(get_data_dir(), "overlayframeworks", "duplicatedcategory.py"),
+            temp_path,
+        )
         get_user_frameworks_path.return_value = temp_path
         # load home framework-directory
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "testframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "testframeworks"):
             frameworks.load_frameworks()
 
         # ensure that the overlay one is loaded
         categoryA = self.CategoryHandler.categories["category-a"]
         self.assertEqual(categoryA.name, "Category A")
-        self.assertEqual(categoryA.frameworks["framework-a-from-overlay"].name, "Framework A from overlay")
+        self.assertEqual(
+            categoryA.frameworks["framework-a-from-overlay"].name,
+            "Framework A from overlay",
+        )
         # ensure that the other frameworks are still loaded
-        self.assertEqual(self.CategoryHandler.categories["category-b"].name, "Category/B")
+        self.assertEqual(
+            self.CategoryHandler.categories["category-b"].name, "Category/B"
+        )
         self.expect_warn_error = True  # expect warning due to duplication
 
     @patch("umake.frameworks.get_user_frameworks_path")
-    def test_load_additional_frameworks_with_dup_progname_env_before_home_before_system(self, get_user_frameworks_path):
+    def test_load_additional_frameworks_with_dup_progname_env_before_home_before_system(
+        self, get_user_frameworks_path
+    ):
         """Ensure we load additional frameworks from env before home and system if they have the same names"""
         # env var
         temp_path = tempfile.mkdtemp()
         self.dirs_to_remove.append(temp_path)
         os.environ[UMAKE_FRAMEWORKS_ENVIRON_VARIABLE] = temp_path
-        shutil.copy(os.path.join(get_data_dir(), "overlayframeworks", "duplicatedcategory2.py"), temp_path)
+        shutil.copy(
+            os.path.join(get_data_dir(), "overlayframeworks", "duplicatedcategory2.py"),
+            temp_path,
+        )
         # home dir
         temp_path = tempfile.mkdtemp()
         self.dirs_to_remove.append(temp_path)
-        shutil.copy(os.path.join(get_data_dir(), "overlayframeworks", "duplicatedcategory.py"), temp_path)
+        shutil.copy(
+            os.path.join(get_data_dir(), "overlayframeworks", "duplicatedcategory.py"),
+            temp_path,
+        )
         get_user_frameworks_path.return_value = temp_path
         # load env and home framework-directory
-        with patchelem(umake.frameworks, '__file__', os.path.join(self.testframeworks_dir, '__init__.py')),\
-                patchelem(umake.frameworks, '__package__', "testframeworks"):
+        with patchelem(
+            umake.frameworks,
+            "__file__",
+            os.path.join(self.testframeworks_dir, "__init__.py"),
+        ), patchelem(umake.frameworks, "__package__", "testframeworks"):
             frameworks.load_frameworks()
 
         # ensure that the env overlay one is loaded
         categoryA = self.CategoryHandler.categories["category-a"]
         self.assertEqual(categoryA.name, "Category A")
-        self.assertEqual(categoryA.frameworks["framework-a-from-overlay-2"].name, "Framework A from overlay 2")
+        self.assertEqual(
+            categoryA.frameworks["framework-a-from-overlay-2"].name,
+            "Framework A from overlay 2",
+        )
         # ensure that the other frameworks are still loaded
-        self.assertEqual(self.CategoryHandler.categories["category-b"].name, "Category/B")
+        self.assertEqual(
+            self.CategoryHandler.categories["category-b"].name, "Category/B"
+        )
         self.expect_warn_error = True  # expect warning due to duplication
 
 
@@ -1263,25 +1778,35 @@ class TestProductionFrameworkLoader(BaseFrameworkLoader):
     def test_load_scala(self):
         """Can load production frameworks"""
         frameworks.load_frameworks()
-        self.assertTrue(len(self.CategoryHandler.categories) > 0, str(self.CategoryHandler.categories))
+        self.assertTrue(
+            len(self.CategoryHandler.categories) > 0,
+            str(self.CategoryHandler.categories),
+        )
         self.assertIsNotNone(self.CategoryHandler.main_category)
-        self.assertEqual(len(self.CategoryHandler.categories["scala"].frameworks), 1,
-                         str(self.CategoryHandler.categories["scala"].frameworks))
+        self.assertEqual(
+            len(self.CategoryHandler.categories["scala"].frameworks),
+            1,
+            str(self.CategoryHandler.categories["scala"].frameworks),
+        )
 
     def test_ignored_frameworks(self):
         """Ignored frameworks aren't loaded"""
         frameworks.load_frameworks()
-        self.assertNotIn(BaseInstaller, frameworks.BaseCategory.main_category.frameworks.values())
+        self.assertNotIn(
+            BaseInstaller, frameworks.BaseCategory.main_category.frameworks.values()
+        )
 
 
 class TestCustomFrameworkCantLoad(BaseFrameworkLoader):
     """Get custom unloadable automatically frameworks to test custom corner cases"""
 
     class _CustomFramework(umake.frameworks.BaseFramework):
-
         def __init__(self):
-            super().__init__(name="Custom", description="Custom uninstallable framework",
-                             category=umake.frameworks.MainCategory())
+            super().__init__(
+                name="Custom",
+                description="Custom uninstallable framework",
+                category=umake.frameworks.MainCategory(),
+            )
 
         def setup(self):
             super().setup()

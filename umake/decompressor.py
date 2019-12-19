@@ -76,7 +76,9 @@ class Decompressor:
         executor = futures.ThreadPoolExecutor(max_workers=3)
         for fd in orders:
             logger.info("Requesting decompression to {}".format(orders[fd].dest))
-            future = executor.submit(self._decompress, fd, orders[fd].dir, orders[fd].dest)
+            future = executor.submit(
+                self._decompress, fd, orders[fd].dir, orders[fd].dest
+            )
             future.tag_fd = fd
             future.tag_dest = orders[fd].dest
             future.add_done_callback(self._one_done)
@@ -95,7 +97,7 @@ class Decompressor:
         try:
             try:
                 # the fd isn't forcibly at position 0 (like in Unity3D where we offset the script part)
-                archive = tarfile.open(fileobj=fd, mode='r|*')
+                archive = tarfile.open(fileobj=fd, mode="r|*")
                 logger.debug("tar file")
             except tarfile.ReadError:
                 archive = self.ZipFileWithPerm(fd.name)
@@ -124,7 +126,11 @@ class Decompressor:
             fd.close()
             st = os.stat(name)
             os.chmod(name, st.st_mode | stat.S_IEXEC)
-            archive = subprocess.Popen([name, "-o{}".format(tempdest)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            archive = subprocess.Popen(
+                [name, "-o{}".format(tempdest)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
             archive.communicate()
             logger.debug("executable file")
             os.remove(name)
@@ -145,8 +151,12 @@ class Decompressor:
 
         result = self.DecompressResult(error=None)
         if future.exception():
-            logger.error("A decompression to {} failed: {}".format(future.tag_dest, future.exception()),
-                         exc_info=future.exception())
+            logger.error(
+                "A decompression to {} failed: {}".format(
+                    future.tag_dest, future.exception()
+                ),
+                exc_info=future.exception(),
+            )
             result = result._replace(error=str(future.exception()))
 
         logger.info("Decompression to {} finished".format(future.tag_dest))
@@ -159,5 +169,9 @@ class Decompressor:
 
         uris of the temporary files will be passed on the wired callback
         """
-        logger.info("All pending decompression done to {} done.".format([self._orders[fd].dest for fd in self._orders]))
+        logger.info(
+            "All pending decompression done to {} done.".format(
+                [self._orders[fd].dest for fd in self._orders]
+            )
+        )
         self._done_callback(self._decompressed)

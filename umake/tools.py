@@ -55,14 +55,16 @@ root_lock = Lock()
 @unique
 class ChecksumType(Enum):
     """Types of supported checksum algorithms."""
+
     md5 = "md5"
     sha1 = "sha1"
     sha256 = "sha256"
     sha512 = "sha512"
 
 
-class Checksum(namedtuple('Checksum', ['checksum_type', 'checksum_value'])):
+class Checksum(namedtuple("Checksum", ["checksum_type", "checksum_value"])):
     """A combination of checksum algorithm and actual value to check."""
+
     pass
 
 
@@ -77,7 +79,6 @@ class Singleton(type):
 
 
 class ConfigHandler(metaclass=Singleton):
-
     def __init__(self):
         """Load the config"""
         self._config = {}
@@ -85,7 +86,9 @@ class ConfigHandler(metaclass=Singleton):
         config_file = load_first_config(settings.CONFIG_FILENAME)
         if old_config_file:
             if not config_file:
-                config_file = old_config_file.replace(settings.OLD_CONFIG_FILENAME, settings.CONFIG_FILENAME)
+                config_file = old_config_file.replace(
+                    settings.OLD_CONFIG_FILENAME, settings.CONFIG_FILENAME
+                )
             os.rename(old_config_file, config_file)
         logger.debug("Opening {}".format(config_file))
         try:
@@ -105,7 +108,7 @@ class ConfigHandler(metaclass=Singleton):
         config_file = os.path.join(xdg_config_home, settings.CONFIG_FILENAME)
         logging.debug("Saving new configuration: {} in {}".format(config, config_file))
         os.makedirs(os.path.dirname(config_file), exist_ok=True)
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             yaml.dump(config, f, default_flow_style=False)
         self._config = config
 
@@ -165,6 +168,7 @@ class MainLoop(object, metaclass=Singleton):
 
         def inner(*args, **kwargs):
             return GLib.idle_add(wrapper, *args, **kwargs)
+
         return inner
 
     class ReturnMainLoop(BaseException):
@@ -195,7 +199,9 @@ def get_current_arch():
     """
     global _current_arch
     if _current_arch is None:
-        _current_arch = subprocess.check_output(["dpkg", "--print-architecture"], universal_newlines=True).rstrip("\n")
+        _current_arch = subprocess.check_output(
+            ["dpkg", "--print-architecture"], universal_newlines=True
+        ).rstrip("\n")
     return _current_arch
 
 
@@ -203,8 +209,13 @@ def get_foreign_archs():
     """Get foreign architectures that were enabled"""
     global _foreign_arch
     if _foreign_arch is None:
-        _foreign_arch = subprocess.check_output(["dpkg", "--print-foreign-architectures"], universal_newlines=True)\
-            .rstrip("\n").split()
+        _foreign_arch = (
+            subprocess.check_output(
+                ["dpkg", "--print-foreign-architectures"], universal_newlines=True
+            )
+            .rstrip("\n")
+            .split()
+        )
     return _foreign_arch
 
 
@@ -217,7 +228,10 @@ def add_foreign_arch(new_arch):
         logger.info("Adding foreign arch: {}".format(new_arch))
         with open(os.devnull, "w") as f:
             with as_root():
-                if subprocess.call(["dpkg", "--add-architecture", new_arch], stdout=f) != 0:
+                if (
+                    subprocess.call(["dpkg", "--add-architecture", new_arch], stdout=f)
+                    != 0
+                ):
                     msg = _("Can't add foreign architecture {}").format(new_arch)
                     raise BaseException(msg)
     # mark the new arch as added and invalidate the cache
@@ -233,8 +247,8 @@ def get_current_distro_id():
             with open(settings.OS_RELEASE_FILE) as os_release_file:
                 for line in os_release_file:
                     line = line.strip()
-                    if line.startswith('ID='):
-                        _id = line.split('=')[1]
+                    if line.startswith("ID="):
+                        _id = line.split("=")[1]
                         break
         except (FileNotFoundError, IOError) as e:
             message = "Can't open os-release file: {}".format(e)
@@ -251,14 +265,16 @@ def get_current_distro_version(distro_name="ubuntu"):
             with open(settings.OS_RELEASE_FILE) as os_release_file:
                 for line in os_release_file:
                     line = line.strip()
-                    if line.startswith('ID='):
+                    if line.startswith("ID="):
                         if line != "ID={}".format(distro_name):
                             break
-                    if line.startswith('VERSION_ID='):
-                        _version = line.split('=')[1].split('"')[1]
+                    if line.startswith("VERSION_ID="):
+                        _version = line.split("=")[1].split('"')[1]
                         break
                 else:
-                    message = "Couldn't find DISTRIB_RELEASE in {}".format(settings.OS_RELEASE_FILE)
+                    message = "Couldn't find DISTRIB_RELEASE in {}".format(
+                        settings.OS_RELEASE_FILE
+                    )
                     logger.error(message)
                     raise BaseException(message)
         except (FileNotFoundError, IOError) as e:
@@ -270,12 +286,12 @@ def get_current_distro_version(distro_name="ubuntu"):
 
 def is_completion_mode():
     """Return true if we are in completion mode"""
-    return os.environ.get('_ARGCOMPLETE') == '1'
+    return os.environ.get("_ARGCOMPLETE") == "1"
 
 
 def get_user_frameworks_path():
     """Return user frameworks local path"""
-    return os.path.expanduser(os.path.join('~', '.umake', 'frameworks'))
+    return os.path.expanduser(os.path.join("~", ".umake", "frameworks"))
 
 
 def get_icon_path(icon_filename):
@@ -307,11 +323,15 @@ def launcher_exists_and_is_pinned(desktop_filename):
     if "com.canonical.Unity.Launcher" not in Gio.Settings.list_schemas():
         logger.debug("In an Unity environment without the Launcher schema file")
         return False
-    gsettings = Gio.Settings(schema_id="com.canonical.Unity.Launcher", path="/com/canonical/unity/launcher/")
+    gsettings = Gio.Settings(
+        schema_id="com.canonical.Unity.Launcher", path="/com/canonical/unity/launcher/"
+    )
     launcher_list = gsettings.get_strv("favorites")
     res = "application://" + desktop_filename in launcher_list
     if not res:
-        logger.debug("Launcher exists but is not pinned (pinned: {}).".format(launcher_list))
+        logger.debug(
+            "Launcher exists but is not pinned (pinned: {}).".format(launcher_list)
+        )
     return res
 
 
@@ -342,7 +362,9 @@ def create_launcher(desktop_filename, content):
     if "com.canonical.Unity.Launcher" not in Gio.Settings.list_schemas():
         logger.info("Don't create a launcher icon, as we are not under Unity")
         return
-    gsettings = Gio.Settings(schema_id="com.canonical.Unity.Launcher", path="/com/canonical/unity/launcher/")
+    gsettings = Gio.Settings(
+        schema_id="com.canonical.Unity.Launcher", path="/com/canonical/unity/launcher/"
+    )
     launcher_list = gsettings.get_strv("favorites")
     launcher_tag = "application://{}".format(desktop_filename)
     if launcher_tag not in launcher_list:
@@ -366,9 +388,12 @@ def add_exec_link(exec_path, destination_name):
     os.symlink(exec_path, full_dest_path)
 
 
-def get_application_desktop_file(name="", icon_path="", try_exec="", exec="", comment="", categories="", extra=""):
+def get_application_desktop_file(
+    name="", icon_path="", try_exec="", exec="", comment="", categories="", extra=""
+):
     """Get a desktop file string content"""
-    return dedent("""\
+    return dedent(
+        """\
                 [Desktop Entry]
                 Version=1.0
                 Type=Application
@@ -380,13 +405,21 @@ def get_application_desktop_file(name="", icon_path="", try_exec="", exec="", co
                 Categories={categories}
                 Terminal=false
                 {extra}
-                """).format(name=name, icon_path=icon_path, try_exec=try_exec, exec=exec,
-                            comment=comment, categories=categories, extra=extra)
+                """
+    ).format(
+        name=name,
+        icon_path=icon_path,
+        try_exec=try_exec,
+        exec=exec,
+        comment=comment,
+        categories=categories,
+        extra=extra,
+    )
 
 
 def strip_tags(content):
     """Strip all HTML tags from content"""
-    return re.sub('<[^<]+?>', '', content)
+    return re.sub("<[^<]+?>", "", content)
 
 
 def switch_to_current_user():
@@ -414,9 +447,9 @@ def as_root():
 # TODO: make that useful for more shells
 def _get_shell_profile_file_path():
     """Return profile filepath for current preferred shell"""
-    current_shell = os.getenv('SHELL', '/bin/bash').lower()
-    profile_filename = '.zprofile' if 'zsh' in current_shell else '.profile'
-    return os.path.join(os.path.expanduser('~'), profile_filename)
+    current_shell = os.getenv("SHELL", "/bin/bash").lower()
+    profile_filename = ".zprofile" if "zsh" in current_shell else ".profile"
+    return os.path.join(os.path.expanduser("~"), profile_filename)
 
 
 def remove_framework_envs_from_user(framework_tag):
@@ -425,7 +458,7 @@ def remove_framework_envs_from_user(framework_tag):
     content = ""
     framework_header = profile_tag.format(framework_tag)
     try:
-        with open(profile_filepath, "r", encoding='utf-8') as f:
+        with open(profile_filepath, "r", encoding="utf-8") as f:
             content = f.read()
     except FileNotFoundError:
         return
@@ -435,10 +468,13 @@ def remove_framework_envs_from_user(framework_tag):
     while framework_header in content:
         framework_start_index = content.find(framework_header)
         framework_end_index = content[framework_start_index:].find("\n\n")
-        content = content[:framework_start_index] + content[framework_start_index + framework_end_index + len("\n\n"):]
+        content = (
+            content[:framework_start_index]
+            + content[framework_start_index + framework_end_index + len("\n\n") :]
+        )
 
     # rewrite .profile and omit framework_tag
-    with open(profile_filepath + ".new", "w", encoding='utf-8') as f:
+    with open(profile_filepath + ".new", "w", encoding="utf-8") as f:
         f.write(content)
     os.rename(profile_filepath + ".new", profile_filepath)
 
@@ -467,11 +503,13 @@ def add_env_to_user(framework_tag, env_dict):
             os.environ[env] = value
         envs_to_insert[env] = value
 
-    with open(profile_filepath, "a", encoding='utf-8') as f:
+    with open(profile_filepath, "a", encoding="utf-8") as f:
         f.write(profile_tag.format(framework_tag))
         for env in envs_to_insert:
             value = envs_to_insert[env]
-            logger.debug("Adding {} to user's {} for {}".format(value, env, framework_tag))
+            logger.debug(
+                "Adding {} to user's {} for {}".format(value, env, framework_tag)
+            )
             export = ""
             if env != "PATH":
                 export = "export "

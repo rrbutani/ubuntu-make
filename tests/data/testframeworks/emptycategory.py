@@ -24,6 +24,7 @@ import umake.frameworks
 
 
 class EmptyCategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
-        super().__init__(name="Empty category", description="Category which has no frameworks")
+        super().__init__(
+            name="Empty category", description="Category which has no frameworks"
+        )

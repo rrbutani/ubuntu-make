@@ -32,7 +32,7 @@ class FTPAdapter(BaseAdapter):
 
     @staticmethod
     def get_connection(hostname, timeout=None):
-        return FTP(host=hostname, timeout=timeout, user='anonymous')
+        return FTP(host=hostname, timeout=timeout, user="anonymous")
 
     def send(self, request, stream=False, timeout=None, **kwargs):
 
@@ -40,7 +40,7 @@ class FTPAdapter(BaseAdapter):
         file_path = parsed_url.path
 
         # Strip the leading slash, if present.
-        if file_path.startswith('/'):
+        if file_path.startswith("/"):
             file_path = file_path[1:]
 
         try:
@@ -69,7 +69,7 @@ class FTPAdapter(BaseAdapter):
 
             def handle_transfer():
                 # Download all the chunks into a queue, then place a sentinel object into it to signal completion.
-                self.conn.retrbinary('RETR ' + file_path, queue.put)
+                self.conn.retrbinary("RETR " + file_path, queue.put)
                 queue.put(done_sentinel)
 
             Thread(target=handle_transfer).start()
@@ -93,13 +93,13 @@ class FTPAdapter(BaseAdapter):
                             yield buffer
                         return
 
-            Raw = namedtuple('raw', 'stream')
+            Raw = namedtuple("raw", "stream")
 
             raw = Raw(stream)
 
             resp.status_code = 200
             resp.raw = raw
-            resp.headers['content-length'] = size
+            resp.headers["content-length"] = size
             resp.close = lambda: self.conn.close()
             return resp
 

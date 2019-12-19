@@ -30,7 +30,9 @@ class ScalaInContainer(ContainerTests, test_scala.ScalaTests):
 
     def setUp(self):
         self.hosts = {80: ["www.scala-lang.org"]}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'scala')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "scala")
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "scala", "scala-lang")
+        self.installed_path = os.path.join(
+            self.install_base_path, "scala", "scala-lang"
+        )

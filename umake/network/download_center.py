@@ -36,13 +36,20 @@ from umake.tools import ChecksumType, root_lock
 logger = logging.getLogger(__name__)
 
 
-class DownloadItem(namedtuple('DownloadItem', ['url', 'checksum', 'headers', 'ignore_encoding', 'cookies'])):
+class DownloadItem(
+    namedtuple(
+        "DownloadItem", ["url", "checksum", "headers", "ignore_encoding", "cookies"]
+    )
+):
     """An individual item to be downloaded and checked.
 
     Checksum should be an instance of tools.Checksum, if provided.
     Headers should be a dictionary of HTTP headers, if provided.
     Cookies should be a cookie dictionary, if provided."""
-    def __new__(cls, url, checksum=None, headers=None, ignore_encoding=False, cookies=None):
+
+    def __new__(
+        cls, url, checksum=None, headers=None, ignore_encoding=False, cookies=None
+    ):
         return super().__new__(cls, url, checksum, headers, ignore_encoding, cookies)
 
 
@@ -50,7 +57,9 @@ class DownloadCenter:
     """Read or download requested urls in separate threads."""
 
     BLOCK_SIZE = 1024 * 8  # from urlretrieve code
-    DownloadResult = namedtuple("DownloadResult", ["buffer", "error", "fd", "final_url", "cookies"])
+    DownloadResult = namedtuple(
+        "DownloadResult", ["buffer", "error", "fd", "final_url", "cookies"]
+    )
 
     def __init__(self, urls, on_done, download=True, report=lambda x: None):
         """Generate a threaded download machine.
@@ -127,16 +136,21 @@ class DownloadCenter:
         # Requests support redirection out of the box.
         # Create a session so we can mount our own FTP adapter.
         session = requests.Session()
-        session.mount('ftp://', FTPAdapter())
+        session.mount("ftp://", FTPAdapter())
         try:
-            with closing(session.get(url, stream=True, headers=headers, cookies=cookies)) as r:
+            with closing(
+                session.get(url, stream=True, headers=headers, cookies=cookies)
+            ) as r:
                 r.raise_for_status()
-                content_size = int(r.headers.get('content-length', -1))
+                content_size = int(r.headers.get("content-length", -1))
 
                 # read in chunk and send report updates
                 block_num = 0
                 _report(block_num, self.BLOCK_SIZE, content_size)
-                for data in r.raw.stream(amt=self.BLOCK_SIZE, decode_content=not download_item.ignore_encoding):
+                for data in r.raw.stream(
+                    amt=self.BLOCK_SIZE,
+                    decode_content=not download_item.ignore_encoding,
+                ):
                     dest.write(data)
                     block_num += 1
                     _report(block_num, self.BLOCK_SIZE, content_size)
@@ -164,11 +178,13 @@ class DownloadCenter:
                 msg = "Unsupported checksum type: {}.".format(checksum_type)
                 raise BaseException(msg)
 
-            logger.debug("Expected: {}, actual: {}.".format(checksum_value,
-                                                            actual_checksum))
+            logger.debug(
+                "Expected: {}, actual: {}.".format(checksum_value, actual_checksum)
+            )
             if checksum_value != actual_checksum:
-                msg = ("The checksum of {} doesn't match. Corrupted download? "
-                       "Aborting.").format(url)
+                msg = (
+                    "The checksum of {} doesn't match. Corrupted download? " "Aborting."
+                ).format(url)
                 raise BaseException(msg)
         return dest, final_url, cookies
 
@@ -179,9 +195,18 @@ class DownloadCenter:
         """
 
         if future.exception():
-            logger.error("{} couldn't finish download: {}".format(future.tag_url, future.exception()))
-            result = self.DownloadResult(buffer=None, error=str(future.exception()), fd=None, final_url=None,
-                                         cookies=None)
+            logger.error(
+                "{} couldn't finish download: {}".format(
+                    future.tag_url, future.exception()
+                )
+            )
+            result = self.DownloadResult(
+                buffer=None,
+                error=str(future.exception()),
+                fd=None,
+                final_url=None,
+                cookies=None,
+            )
             # cleaned unusable temp file as something bad happened
             future.tag_dest.close()
         else:
@@ -189,9 +214,13 @@ class DownloadCenter:
             fd, final_url, cookies = future.result()
             fd.seek(0)
             if future.tag_download:
-                result = self.DownloadResult(buffer=None, error=None, fd=fd, final_url=final_url, cookies=cookies)
+                result = self.DownloadResult(
+                    buffer=None, error=None, fd=fd, final_url=final_url, cookies=cookies
+                )
             else:
-                result = self.DownloadResult(buffer=fd, error=None, fd=None, final_url=final_url, cookies=cookies)
+                result = self.DownloadResult(
+                    buffer=fd, error=None, fd=None, final_url=final_url, cookies=cookies
+                )
         self._downloaded_content[future.tag_url] = result
         if len(self._urls) == len(self._downloaded_content):
             self._done()

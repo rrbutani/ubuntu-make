@@ -24,7 +24,6 @@ import umake.frameworks
 
 
 class ACategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
         super().__init__(name="Category/A", description="Category A description")
 

@@ -32,10 +32,12 @@ class AndroidStudioInContainer(ContainerTests, test_android.AndroidStudioTests):
 
     def setUp(self):
         self.hosts = {443: ["developer.android.com", "dl.google.com"]}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "android")
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "android", "android-studio")
+        self.installed_path = os.path.join(
+            self.install_base_path, "android", "android-studio"
+        )
 
 
 class AndroidSDKInContainer(ContainerTests, test_android.AndroidSDKTests):
@@ -43,21 +45,29 @@ class AndroidSDKInContainer(ContainerTests, test_android.AndroidSDKTests):
 
     def setUp(self):
         self.hosts = {443: ["developer.android.com", "dl.google.com"]}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "android")
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "android", "android-sdk")
+        self.installed_path = os.path.join(
+            self.install_base_path, "android", "android-sdk"
+        )
 
 
-class AndroidPlatformToolsInContainer(ContainerTests, test_android.AndroidPlatformToolsTests):
+class AndroidPlatformToolsInContainer(
+    ContainerTests, test_android.AndroidPlatformToolsTests
+):
     """This will install Android Platform Tools inside a container"""
 
     def setUp(self):
         self.hosts = {443: ["developer.android.com", "dl.google.com"]}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android-platform-tools')
+        self.apt_repo_override_path = os.path.join(
+            self.APT_FAKE_REPO_PATH, "android-platform-tools"
+        )
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "android", "android-platform-tools")
+        self.installed_path = os.path.join(
+            self.install_base_path, "android", "android-platform-tools"
+        )
 
 
 class AndroidNDKInContainer(ContainerTests, test_android.AndroidNDKTests):
@@ -65,7 +75,9 @@ class AndroidNDKInContainer(ContainerTests, test_android.AndroidNDKTests):
 
     def setUp(self):
         self.hosts = {443: ["developer.android.com", "dl.google.com"]}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "android")
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "android", "android-ndk")
+        self.installed_path = os.path.join(
+            self.install_base_path, "android", "android-ndk"
+        )

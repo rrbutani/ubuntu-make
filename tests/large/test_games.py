@@ -40,10 +40,14 @@ class StencylTests(LargeFrameworkTests):
 
     def test_default_stencyl_install(self):
         """Install stencyl from scratch test case"""
-        self.child = spawn_process(self.command('{} games stencyl'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} games stencyl".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher
@@ -56,13 +60,17 @@ class StencylTests(LargeFrameworkTests):
         use_cwd = self.installed_path
         if self.in_container:
             use_cwd = None
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL, cwd=use_cwd)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            cwd=use_cwd,
+        )
         self.check_and_kill_process([self.exec_path], wait_before=self.TIMEOUT_START)
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
-        self.child = spawn_process(self.command('{} games stencyl'.format(UMAKE)))
+        self.child = spawn_process(self.command("{} games stencyl".format(UMAKE)))
         self.expect_and_no_warn("Stencyl is already installed.*\[.*\] ")
         self.child.sendline()
         self.wait_and_close()
@@ -82,10 +90,14 @@ class BlenderTests(LargeFrameworkTests):
 
     def test_default_blender_install(self):
         """Install blender from scratch test case"""
-        self.child = spawn_process(self.command('{} games blender'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} games blender".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher
@@ -98,13 +110,17 @@ class BlenderTests(LargeFrameworkTests):
         use_cwd = self.installed_path
         if self.in_container:
             use_cwd = None
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL, cwd=use_cwd)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            cwd=use_cwd,
+        )
         self.check_and_kill_process([self.exec_path], wait_before=self.TIMEOUT_START)
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
-        self.child = spawn_process(self.command('{} games blender'.format(UMAKE)))
+        self.child = spawn_process(self.command("{} games blender".format(UMAKE)))
         self.expect_and_no_warn("Blender is already installed.*\[.*\] ")
         self.child.sendline()
         self.wait_and_close()
@@ -129,10 +145,14 @@ class Unity3DTests(LargeFrameworkTests):
         if platform.machine() != "x86_64":
             return
 
-        self.child = spawn_process(self.command('{} games unity3d'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} games unity3d".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher
@@ -142,17 +162,22 @@ class Unity3DTests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # ensure setuid
-        self.assertEqual(self.get_file_perms(os.path.join(self.installed_path, "chrome-sandbox")),
-                         '-rwsr-xr-x')
+        self.assertEqual(
+            self.get_file_perms(os.path.join(self.installed_path, "chrome-sandbox")),
+            "-rwsr-xr-x",
+        )
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         self.check_and_kill_process([self.exec_path], wait_before=self.TIMEOUT_START)
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
-        self.child = spawn_process(self.command('{} games unity3d'.format(UMAKE)))
+        self.child = spawn_process(self.command("{} games unity3d".format(UMAKE)))
         self.expect_and_no_warn("Unity3d is already installed.*\[.*\] ")
         self.child.sendline()
         self.wait_and_close()
@@ -173,10 +198,14 @@ class TwineTests(LargeFrameworkTests):
     def test_default_twine_install(self):
         """Install twine editor from scratch test case"""
 
-        self.child = spawn_process(self.command('{} games twine'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} games twine".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher
@@ -186,13 +215,16 @@ class TwineTests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         self.check_and_kill_process([self.exec_path], wait_before=self.TIMEOUT_START)
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
-        self.child = spawn_process(self.command('{} games twine'.format(UMAKE)))
+        self.child = spawn_process(self.command("{} games twine".format(UMAKE)))
         self.expect_and_no_warn("Twine is already installed.*\[.*\] ")
         self.child.sendline()
         self.wait_and_close()
@@ -207,17 +239,23 @@ class SuperpowersTests(LargeFrameworkTests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "games", "superpowers")
+        self.installed_path = os.path.join(
+            self.install_base_path, "games", "superpowers"
+        )
         self.desktop_filename = "superpowers.desktop"
-        self.command_args = '{} games superpowers'.format(UMAKE)
+        self.command_args = "{} games superpowers".format(UMAKE)
 
     def test_default_superpowers_install(self):
         """Install Superpowers editor from scratch test case"""
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher
@@ -227,8 +265,11 @@ class SuperpowersTests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         self.check_and_kill_process([self.exec_path], wait_before=self.TIMEOUT_START)
         proc.wait(self.TIMEOUT_STOP)
 
@@ -250,15 +291,19 @@ class GDevelopTests(LargeFrameworkTests):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "games", "gdevelop")
         self.desktop_filename = "gdevelop.desktop"
-        self.command_args = '{} games gdevelop'.format(UMAKE)
+        self.command_args = "{} games gdevelop".format(UMAKE)
 
     def test_default_gdevelop_install(self):
         """Install GDevelop editor from scratch test case"""
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher
@@ -268,8 +313,11 @@ class GDevelopTests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         self.check_and_kill_process([self.exec_path], wait_before=self.TIMEOUT_START)
         proc.wait(self.TIMEOUT_STOP)
 
@@ -291,15 +339,19 @@ class GodotTests(LargeFrameworkTests):
         super().setUp()
         self.installed_path = os.path.join(self.install_base_path, "games", "godot")
         self.desktop_filename = "godot.desktop"
-        self.command_args = '{} games godot'.format(UMAKE)
+        self.command_args = "{} games godot".format(UMAKE)
 
     def test_default_godot_install(self):
         """Install Godot editor from scratch test case"""
 
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher
@@ -309,8 +361,11 @@ class GodotTests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         self.check_and_kill_process([self.exec_path], wait_before=self.TIMEOUT_START)
         proc.wait(self.TIMEOUT_STOP)
 

@@ -31,7 +31,9 @@ class GeneralTests(LargeFrameworkTests):
         """Trying to run a category without a default framework exits in error"""
         exception_raised = False
         try:
-            subprocess.check_output(self.command_as_list([UMAKE, 'ide']), stderr=subprocess.STDOUT)
+            subprocess.check_output(
+                self.command_as_list([UMAKE, "ide"]), stderr=subprocess.STDOUT
+            )
         except subprocess.CalledProcessError as e:
             self.assertIn("ERROR:", e.output.decode("utf-8"))
             exception_raised = True

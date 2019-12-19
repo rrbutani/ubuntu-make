@@ -41,26 +41,44 @@ class EclipseJavaIDEInContainer(ContainerTests, test_ide.EclipseJavaIDETests):
     def setUp(self):
         self.hosts = {443: ["www.eclipse.org"], 80: ["www.eclipse.org"]}
         # we reuse the android-studio repo
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "android")
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "eclipse")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "www.eclipse.org", "technology", "epp",
-                                                        "downloads", "release", "version", "point_release",
-                                                        "eclipse-java-linux-gtk-x86_64.tar.gz.sha512")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "www.eclipse.org",
+            "technology",
+            "epp",
+            "downloads",
+            "release",
+            "version",
+            "point_release",
+            "eclipse-java-linux-gtk-x86_64.tar.gz.sha512",
+        )
 
     def test_install_with_changed_download_page(self):
         """Installing eclipse ide should fail if download page has significantly changed"""
-        download_page_file_path = os.path.join(get_data_dir(), "server-content", "www.eclipse.org", "downloads",
-                                               "packages", "index.html")
-        self.bad_download_page_test(self.command(self.command_args), download_page_file_path)
+        download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "www.eclipse.org",
+            "downloads",
+            "packages",
+            "index.html",
+        )
+        self.bad_download_page_test(
+            self.command(self.command_args), download_page_file_path
+        )
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
         self.assertFalse(self.is_in_path(self.exec_link))
 
     def test_install_with_changed_checksum_page(self):
         """Installing eclipse ide should fail if checksum link is unparsable"""
-        self.bad_download_page_test(self.command(self.command_args), self.bad_download_page_file_path)
+        self.bad_download_page_test(
+            self.command(self.command_args), self.bad_download_page_file_path
+        )
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
         self.assertFalse(self.is_in_path(self.exec_link))
 
@@ -74,14 +92,22 @@ class EclipseJEEIDEInContainer(ContainerTests, test_ide.EclipseJEEIDETests):
     def setUp(self):
         self.hosts = {443: ["www.eclipse.org"], 80: ["www.eclipse.org"]}
         # we reuse the android-studio repo
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "android")
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "eclipse-jee")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "www.eclipse.org", "technology", "epp",
-                                                        "downloads", "release", "version", "point_release",
-                                                        "eclipse-jee-linux-gtk-x86_64.tar.gz.sha512")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "www.eclipse.org",
+            "technology",
+            "epp",
+            "downloads",
+            "release",
+            "version",
+            "point_release",
+            "eclipse-jee-linux-gtk-x86_64.tar.gz.sha512",
+        )
 
 
 class EclipsePHPIDEInContainer(ContainerTests, test_ide.EclipsePHPIDETests):
@@ -93,14 +119,22 @@ class EclipsePHPIDEInContainer(ContainerTests, test_ide.EclipsePHPIDETests):
     def setUp(self):
         self.hosts = {443: ["www.eclipse.org"], 80: ["www.eclipse.org"]}
         # we reuse the android-studio repo
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "android")
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "eclipse-php")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "www.eclipse.org", "technology", "epp",
-                                                        "downloads", "release", "version", "point_release",
-                                                        "eclipse-php-linux-gtk-x86_64.tar.gz.sha512")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "www.eclipse.org",
+            "technology",
+            "epp",
+            "downloads",
+            "release",
+            "version",
+            "point_release",
+            "eclipse-php-linux-gtk-x86_64.tar.gz.sha512",
+        )
 
 
 class EclipseJSIDEInContainer(ContainerTests, test_ide.EclipseJSIDETests):
@@ -112,14 +146,24 @@ class EclipseJSIDEInContainer(ContainerTests, test_ide.EclipseJSIDETests):
     def setUp(self):
         self.hosts = {443: ["www.eclipse.org"], 80: ["www.eclipse.org"]}
         # we reuse the android-studio repo
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "android")
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "ide", "eclipse-javascript")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "www.eclipse.org", "technology", "epp",
-                                                        "downloads", "release", "version", "point_release",
-                                                        "eclipse-javascript-linux-gtk-x86_64.tar.gz.sha512")
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "eclipse-javascript"
+        )
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "www.eclipse.org",
+            "technology",
+            "epp",
+            "downloads",
+            "release",
+            "version",
+            "point_release",
+            "eclipse-javascript-linux-gtk-x86_64.tar.gz.sha512",
+        )
 
 
 class EclipseCPPIDEInContainer(ContainerTests, test_ide.EclipseCPPIDETests):
@@ -131,14 +175,22 @@ class EclipseCPPIDEInContainer(ContainerTests, test_ide.EclipseCPPIDETests):
     def setUp(self):
         self.hosts = {443: ["www.eclipse.org"], 80: ["www.eclipse.org"]}
         # we reuse the android-studio repo
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "android")
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "eclipse-cpp")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "www.eclipse.org", "technology", "epp",
-                                                        "downloads", "release", "version", "point_release",
-                                                        "eclipse-cpp-linux-gtk-x86_64.tar.gz.sha512")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "www.eclipse.org",
+            "technology",
+            "epp",
+            "downloads",
+            "release",
+            "version",
+            "point_release",
+            "eclipse-cpp-linux-gtk-x86_64.tar.gz.sha512",
+        )
 
 
 class IdeaIDEInContainer(ContainerTests, test_ide.IdeaIDETests):
@@ -148,20 +200,26 @@ class IdeaIDEInContainer(ContainerTests, test_ide.IdeaIDETests):
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ["data.services.jetbrains.com", 'download.jetbrains.com']}
+        self.hosts = {443: ["data.services.jetbrains.com", "download.jetbrains.com"]}
         # we reuse the android-studio repo
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "android")
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "idea")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "data.services.jetbrains.com",
-                                                        "products", "releases?code=IIC")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "data.services.jetbrains.com",
+            "products",
+            "releases?code=IIC",
+        )
 
     # This actually tests the code in BaseJetBrains
     def test_install_with_changed_download_page(self):
         """Installing IntelliJ Idea should fail if download page has changed"""
-        self.bad_download_page_test(self.command(self.command_args), self.bad_download_page_file_path)
+        self.bad_download_page_test(
+            self.command(self.command_args), self.bad_download_page_file_path
+        )
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
         self.assertFalse(self.is_in_path(self.exec_link))
 
@@ -173,15 +231,21 @@ class IdeaUltimateIDEInContainer(ContainerTests, test_ide.IdeaUltimateIDETests):
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ["data.services.jetbrains.com", 'download.jetbrains.com']}
+        self.hosts = {443: ["data.services.jetbrains.com", "download.jetbrains.com"]}
         # we reuse the android-studio repo
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "android")
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "ide", "idea-ultimate")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "data.services.jetbrains.com",
-                                                        "products", "releases?code=IIU")
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "idea-ultimate"
+        )
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "data.services.jetbrains.com",
+            "products",
+            "releases?code=IIU",
+        )
 
 
 class PyCharmIDEInContainer(ContainerTests, test_ide.PyCharmIDETests):
@@ -191,45 +255,65 @@ class PyCharmIDEInContainer(ContainerTests, test_ide.PyCharmIDETests):
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ["data.services.jetbrains.com", 'download.jetbrains.com']}
+        self.hosts = {443: ["data.services.jetbrains.com", "download.jetbrains.com"]}
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "pycharm")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "data.services.jetbrains.com",
-                                                        "products", "releases?code=PCC")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "data.services.jetbrains.com",
+            "products",
+            "releases?code=PCC",
+        )
 
 
-class PyCharmEducationalIDEInContainer(ContainerTests, test_ide.PyCharmEducationalIDETests):
+class PyCharmEducationalIDEInContainer(
+    ContainerTests, test_ide.PyCharmEducationalIDETests
+):
     """This will test the PyCharm Educational IDE integration inside a container"""
 
     TIMEOUT_START = 20
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ["data.services.jetbrains.com", 'download.jetbrains.com']}
+        self.hosts = {443: ["data.services.jetbrains.com", "download.jetbrains.com"]}
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "ide", "pycharm-educational")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "data.services.jetbrains.com",
-                                                        "products", "releases?code=PCE")
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "pycharm-educational"
+        )
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "data.services.jetbrains.com",
+            "products",
+            "releases?code=PCE",
+        )
 
 
-class PyCharmProfessionalIDEInContainer(ContainerTests, test_ide.PyCharmProfessionalIDETests):
+class PyCharmProfessionalIDEInContainer(
+    ContainerTests, test_ide.PyCharmProfessionalIDETests
+):
     """This will test the PyCharm Professional IDE integration inside a container"""
 
     TIMEOUT_START = 20
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ["data.services.jetbrains.com", 'download.jetbrains.com']}
+        self.hosts = {443: ["data.services.jetbrains.com", "download.jetbrains.com"]}
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "ide", "pycharm-professional")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "data.services.jetbrains.com",
-                                                        "products", "releases?code=PCP")
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "pycharm-professional"
+        )
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "data.services.jetbrains.com",
+            "products",
+            "releases?code=PCP",
+        )
 
 
 class RubyMineIDEInContainer(ContainerTests, test_ide.RubyMineIDETests):
@@ -239,14 +323,18 @@ class RubyMineIDEInContainer(ContainerTests, test_ide.RubyMineIDETests):
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ["data.services.jetbrains.com", 'download.jetbrains.com']}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'rubymine')
+        self.hosts = {443: ["data.services.jetbrains.com", "download.jetbrains.com"]}
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "rubymine")
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "rubymine")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "data.services.jetbrains.com",
-                                                        "products", "releases?code=RM")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "data.services.jetbrains.com",
+            "products",
+            "releases?code=RM",
+        )
 
 
 class WebStormIDEInContainer(ContainerTests, test_ide.WebStormIDETests):
@@ -256,13 +344,17 @@ class WebStormIDEInContainer(ContainerTests, test_ide.WebStormIDETests):
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ["data.services.jetbrains.com", 'download.jetbrains.com']}
+        self.hosts = {443: ["data.services.jetbrains.com", "download.jetbrains.com"]}
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "webstorm")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "data.services.jetbrains.com",
-                                                        "products", "releases?code=WS")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "data.services.jetbrains.com",
+            "products",
+            "releases?code=WS",
+        )
 
 
 class CLionIDEInContainer(ContainerTests, test_ide.CLionIDETests):
@@ -272,13 +364,17 @@ class CLionIDEInContainer(ContainerTests, test_ide.CLionIDETests):
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ["data.services.jetbrains.com", 'download.jetbrains.com']}
+        self.hosts = {443: ["data.services.jetbrains.com", "download.jetbrains.com"]}
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "clion")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "data.services.jetbrains.com",
-                                                        "products", "releases?code=CL")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "data.services.jetbrains.com",
+            "products",
+            "releases?code=CL",
+        )
 
 
 class DataGripIDEInContainer(ContainerTests, test_ide.DataGripIDETests):
@@ -288,13 +384,17 @@ class DataGripIDEInContainer(ContainerTests, test_ide.DataGripIDETests):
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ["data.services.jetbrains.com", 'download.jetbrains.com']}
+        self.hosts = {443: ["data.services.jetbrains.com", "download.jetbrains.com"]}
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "datagrip")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "data.services.jetbrains.com",
-                                                        "products", "releases?code=DG")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "data.services.jetbrains.com",
+            "products",
+            "releases?code=DG",
+        )
 
 
 class PhpStormIDEInContainer(ContainerTests, test_ide.PhpStormIDETests):
@@ -304,13 +404,17 @@ class PhpStormIDEInContainer(ContainerTests, test_ide.PhpStormIDETests):
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ["data.services.jetbrains.com", 'download.jetbrains.com']}
+        self.hosts = {443: ["data.services.jetbrains.com", "download.jetbrains.com"]}
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "phpstorm")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "data.services.jetbrains.com",
-                                                        "products", "releases?code=PS")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "data.services.jetbrains.com",
+            "products",
+            "releases?code=PS",
+        )
 
 
 class GoLandIDEInContainer(ContainerTests, test_ide.GoLandIDETests):
@@ -320,13 +424,17 @@ class GoLandIDEInContainer(ContainerTests, test_ide.GoLandIDETests):
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ["data.services.jetbrains.com", 'download.jetbrains.com']}
+        self.hosts = {443: ["data.services.jetbrains.com", "download.jetbrains.com"]}
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "goland")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "data.services.jetbrains.com",
-                                                        "products", "releases?code=GO")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "data.services.jetbrains.com",
+            "products",
+            "releases?code=GO",
+        )
 
 
 class RiderIDEInContainer(ContainerTests, test_ide.RiderIDETests):
@@ -336,15 +444,19 @@ class RiderIDEInContainer(ContainerTests, test_ide.RiderIDETests):
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ["data.services.jetbrains.com", 'download.jetbrains.com']}
+        self.hosts = {443: ["data.services.jetbrains.com", "download.jetbrains.com"]}
         # we reuse the android-studio repo
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'rider')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "rider")
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "rider")
-        self.bad_download_page_file_path = os.path.join(get_data_dir(),
-                                                        "server-content", "data.services.jetbrains.com",
-                                                        "products", "releases?code=RD")
+        self.bad_download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "data.services.jetbrains.com",
+            "products",
+            "releases?code=RD",
+        )
 
 
 class NetBeansInContainer(ContainerTests, test_ide.NetBeansTests):
@@ -356,16 +468,24 @@ class NetBeansInContainer(ContainerTests, test_ide.NetBeansTests):
     def setUp(self):
         self.hosts = {443: ["www.apache.org"]}
         # Reuse the Android Studio environment.
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "android")
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "netbeans")
 
     def test_install_with_changed_download_page(self):
         """Installing NetBeans ide should fail if download page has significantly changed"""
-        download_page_file_path = os.path.join(get_data_dir(), "server-content", "www.apache.org", "dist",
-                                               "incubator", "netbeans", "incubating-netbeans", "index.html")
-        umake_command = self.command('{} ide netbeans'.format(UMAKE))
+        download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "www.apache.org",
+            "dist",
+            "incubator",
+            "netbeans",
+            "incubating-netbeans",
+            "index.html",
+        )
+        umake_command = self.command("{} ide netbeans".format(UMAKE))
         self.bad_download_page_test(umake_command, download_page_file_path)
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
         self.assertFalse(self.is_in_path(self.exec_link))
@@ -379,10 +499,12 @@ class VisualStudioCodeInContainer(ContainerTests, test_ide.VisualStudioCodeTest)
 
     def setUp(self):
         self.hosts = {443: ["code.visualstudio.com", "go.microsoft.com"]}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'vscode')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "vscode")
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "ide", "visual-studio-code")
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "visual-studio-code"
+        )
 
 
 class LightTableInContainer(ContainerTests, test_ide.LightTableTest):
@@ -393,17 +515,29 @@ class LightTableInContainer(ContainerTests, test_ide.LightTableTest):
 
     def setUp(self):
         self.hosts = {443: ["api.github.com", "github.com"]}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'LightTable')
+        self.apt_repo_override_path = os.path.join(
+            self.APT_FAKE_REPO_PATH, "LightTable"
+        )
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "lighttable")
 
     def test_install_with_changed_download_page(self):
         """Installing LightTable should fail if download page has significantly changed"""
-        download_page_file_path = os.path.join(get_data_dir(), "server-content", "api.github.com",
-                                               "repos", "LightTable", "LightTable", "releases", "latest")
-        umake_command = self.command('{} ide lighttable'.format(UMAKE))
-        self.bad_download_page_test(self.command(self.command_args), download_page_file_path)
+        download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "api.github.com",
+            "repos",
+            "LightTable",
+            "LightTable",
+            "releases",
+            "latest",
+        )
+        umake_command = self.command("{} ide lighttable".format(UMAKE))
+        self.bad_download_page_test(
+            self.command(self.command_args), download_page_file_path
+        )
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
         self.assertFalse(self.is_in_path(self.exec_link))
 
@@ -416,28 +550,48 @@ class AtomInContainer(ContainerTests, test_ide.AtomTest):
 
     def setUp(self):
         self.hosts = {443: ["api.github.com", "github.com"]}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'atom')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "atom")
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "atom")
 
     def test_install_with_changed_download_page(self):
         """Installing Atom should fail if download page has significantly changed"""
-        download_page_file_path = os.path.join(get_data_dir(), "server-content", "api.github.com",
-                                               "repos", "Atom", "Atom", "releases", "latest")
-        umake_command = self.command('{} ide atom'.format(UMAKE))
-        self.bad_download_page_test(self.command(self.command_args), download_page_file_path)
+        download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "api.github.com",
+            "repos",
+            "Atom",
+            "Atom",
+            "releases",
+            "latest",
+        )
+        umake_command = self.command("{} ide atom".format(UMAKE))
+        self.bad_download_page_test(
+            self.command(self.command_args), download_page_file_path
+        )
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
         self.assertFalse(self.is_in_path(self.exec_link))
 
     def test_install_beta_with_changed_download_page(self):
         """Installing Atom Beta should fail if the latest is not a beta"""
-        download_page_file_path = os.path.join(get_data_dir(), "server-content", "api.github.com",
-                                               "repos", "Atom", "Atom", "releases", "index.html")
+        download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "api.github.com",
+            "repos",
+            "Atom",
+            "Atom",
+            "releases",
+            "index.html",
+        )
         with swap_file_and_restore(download_page_file_path) as content:
             with open(download_page_file_path, "w") as newfile:
                 newfile.write(content.replace("-beta", ""))
-            self.child = umake_command = self.command('{} ide atom --beta'.format(UMAKE))
+            self.child = umake_command = self.command(
+                "{} ide atom --beta".format(UMAKE)
+            )
             self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
             self.assertFalse(self.is_in_path(self.exec_link))
 
@@ -452,7 +606,9 @@ class SublimeTextInContainer(ContainerTests, test_ide.SublimeTextTests):
         self.hosts = {443: ["sublimetext.com", "download.sublimetext.com"]}
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "ide", "sublime-text")
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "sublime-text"
+        )
 
 
 class DBeaverInContainer(ContainerTests, test_ide.DBeaverTest):
@@ -460,17 +616,27 @@ class DBeaverInContainer(ContainerTests, test_ide.DBeaverTest):
 
     def setUp(self):
         self.hosts = {443: ["api.github.com", "github.com"]}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'dbeaver')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "dbeaver")
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "dbeaver")
 
     def test_install_with_changed_download_page(self):
         """Installing DBeaver should fail if download page has significantly changed"""
-        download_page_file_path = os.path.join(get_data_dir(), "server-content", "api.github.com",
-                                               "repos", "DBeaver", "DBeaver", "releases", "latest")
-        umake_command = self.command('{} ide dbeaver'.format(UMAKE))
-        self.bad_download_page_test(self.command(self.command_args), download_page_file_path)
+        download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "api.github.com",
+            "repos",
+            "DBeaver",
+            "DBeaver",
+            "releases",
+            "latest",
+        )
+        umake_command = self.command("{} ide dbeaver".format(UMAKE))
+        self.bad_download_page_test(
+            self.command(self.command_args), download_page_file_path
+        )
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
         self.assertFalse(self.is_in_path(self.exec_link))
 
@@ -495,27 +661,42 @@ class SpringToolsSuiteInContainer(ContainerTests, test_ide.SpringToolsSuiteTest)
     TIMEOUT_STOP = 10
 
     def setUp(self):
-        self.hosts = {443: ['spring.io'], 80: ['download.springsource.com']}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'android')
+        self.hosts = {443: ["spring.io"], 80: ["download.springsource.com"]}
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "android")
         super().setUp()
         # override with container path
-        self.installed_path = os.path.join(self.install_base_path, "ide", "spring-tools-suite")
+        self.installed_path = os.path.join(
+            self.install_base_path, "ide", "spring-tools-suite"
+        )
 
     def test_install_with_changed_download_page(self):
         """Installing STS should fail if download page has significantly changed"""
-        download_page_file_path = os.path.join(get_data_dir(), "server-content", "spring.io", "tools", "sts",
-                                               "all")
-        umake_command = self.command('{} ide spring-tools-suite'.format(UMAKE))
-        self.bad_download_page_test(self.command(self.command_args), download_page_file_path)
+        download_page_file_path = os.path.join(
+            get_data_dir(), "server-content", "spring.io", "tools", "sts", "all"
+        )
+        umake_command = self.command("{} ide spring-tools-suite".format(UMAKE))
+        self.bad_download_page_test(
+            self.command(self.command_args), download_page_file_path
+        )
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
         self.assertFalse(self.is_in_path(self.exec_link))
 
     def test_install_with_changed_checksum_page(self):
         """Installing STS should fail if checksum link is unparsable"""
-        download_page_file_path = os.path.join(get_data_dir(), 'server-content', 'download.springsource.com', 'release',
-                                               'STS', 'mock.RELEASE', 'dist', 'emock',
-                                               'spring-tool-suite-mock.RELEASE-emock-linux-gtk-x86_64.tar.gz.sha1')
-        self.bad_download_page_test(self.command(self.command_args), download_page_file_path)
+        download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "download.springsource.com",
+            "release",
+            "STS",
+            "mock.RELEASE",
+            "dist",
+            "emock",
+            "spring-tool-suite-mock.RELEASE-emock-linux-gtk-x86_64.tar.gz.sha1",
+        )
+        self.bad_download_page_test(
+            self.command(self.command_args), download_page_file_path
+        )
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
         self.assertFalse(self.is_in_path(self.exec_link))
 
@@ -528,17 +709,27 @@ class ProcessingInContainer(ContainerTests, test_ide.ProcessingTests):
 
     def setUp(self):
         self.hosts = {443: ["api.github.com", "github.com"]}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'arduino')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "arduino")
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "processing")
 
     def test_install_with_changed_download_page(self):
         """Installing Processing should fail if download page has significantly changed"""
-        download_page_file_path = os.path.join(get_data_dir(), "server-content", "api.github.com",
-                                               "repos", "processing", "processing", "releases", "latest")
-        umake_command = self.command('{} ide processing'.format(UMAKE))
-        self.bad_download_page_test(self.command(self.command_args), download_page_file_path)
+        download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "api.github.com",
+            "repos",
+            "processing",
+            "processing",
+            "releases",
+            "latest",
+        )
+        umake_command = self.command("{} ide processing".format(UMAKE))
+        self.bad_download_page_test(
+            self.command(self.command_args), download_page_file_path
+        )
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
         self.assertFalse(self.is_in_path(self.exec_link))
 
@@ -551,16 +742,26 @@ class LiteIDEInContainer(ContainerTests, test_ide.LiteIDETests):
 
     def setUp(self):
         self.hosts = {443: ["api.github.com", "github.com"]}
-        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, 'liteide')
+        self.apt_repo_override_path = os.path.join(self.APT_FAKE_REPO_PATH, "liteide")
         super().setUp()
         # override with container path
         self.installed_path = os.path.join(self.install_base_path, "ide", "liteide")
 
     def test_install_with_changed_download_page(self):
         """Installing LiteIDE should fail if download page has significantly changed"""
-        download_page_file_path = os.path.join(get_data_dir(), "server-content", "api.github.com",
-                                               "repos", "visualfc", "liteide", "releases", "latest")
-        umake_command = self.command('{} ide liteide'.format(UMAKE))
-        self.bad_download_page_test(self.command(self.command_args), download_page_file_path)
+        download_page_file_path = os.path.join(
+            get_data_dir(),
+            "server-content",
+            "api.github.com",
+            "repos",
+            "visualfc",
+            "liteide",
+            "releases",
+            "latest",
+        )
+        umake_command = self.command("{} ide liteide".format(UMAKE))
+        self.bad_download_page_test(
+            self.command(self.command_args), download_page_file_path
+        )
         self.assertFalse(self.launcher_exists_and_is_pinned(self.desktop_filename))
         self.assertFalse(self.is_in_path(self.exec_link))

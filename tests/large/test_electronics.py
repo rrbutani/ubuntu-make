@@ -38,7 +38,9 @@ class ArduinoIDETests(LargeFrameworkTests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "electronics", "arduino")
+        self.installed_path = os.path.join(
+            self.install_base_path, "electronics", "arduino"
+        )
         self.desktop_filename = "arduino.desktop"
 
     @property
@@ -48,10 +50,14 @@ class ArduinoIDETests(LargeFrameworkTests):
 
     def test_default_install(self):
         """Install Arduino from scratch test case"""
-        self.child = spawn_process(self.command('{} electronics arduino'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} electronics arduino".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -62,14 +68,19 @@ class ArduinoIDETests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-        self.check_and_kill_process(["java", "processing.app.Base"], wait_before=self.TIMEOUT_START)
+        self.check_and_kill_process(
+            ["java", "processing.app.Base"], wait_before=self.TIMEOUT_START
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
-        self.child = spawn_process(self.command('{} electronics arduino'.format(UMAKE)))
+        self.child = spawn_process(self.command("{} electronics arduino".format(UMAKE)))
         self.expect_and_no_warn("Arduino is already installed.*\[.*\] ")
         self.child.sendline()
         self.wait_and_close()
@@ -84,17 +95,23 @@ class EagleTests(LargeFrameworkTests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "electronics", "eagle")
+        self.installed_path = os.path.join(
+            self.install_base_path, "electronics", "eagle"
+        )
         self.desktop_filename = "eagle.desktop"
-        self.command_args = '{} electronics eagle'.format(UMAKE)
+        self.command_args = "{} electronics eagle".format(UMAKE)
         self.name = "Eagle"
 
     def test_default_eclipse_ide_install(self):
         """Install eclipse from scratch test case"""
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -104,11 +121,15 @@ class EagleTests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-        self.check_and_kill_process([self.exec_path],
-                                    wait_before=self.TIMEOUT_START, send_sigkill=True)
+        self.check_and_kill_process(
+            [self.exec_path], wait_before=self.TIMEOUT_START, send_sigkill=True
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:
@@ -127,17 +148,23 @@ class FritzingTests(LargeFrameworkTests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "electronics", "fritzing")
+        self.installed_path = os.path.join(
+            self.install_base_path, "electronics", "fritzing"
+        )
         self.desktop_filename = "fritzing.desktop"
-        self.command_args = '{} electronics fritzing'.format(UMAKE)
+        self.command_args = "{} electronics fritzing".format(UMAKE)
         self.name = "Fritzing"
 
     def test_default_eclipse_ide_install(self):
         """Install fritzing from scratch test case"""
         self.child = spawn_process(self.command(self.command_args))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         # we have an installed launcher, added to the launcher and an icon file
@@ -147,10 +174,15 @@ class FritzingTests(LargeFrameworkTests):
         self.assert_exec_link_exists()
 
         # launch it, send SIGTERM and check that it exits fine
-        proc = subprocess.Popen(self.command_as_list(self.exec_path), stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(
+            self.command_as_list(self.exec_path),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
-        self.check_and_kill_process([self.installed_path, "lib/Fritzing"], wait_before=self.TIMEOUT_START)
+        self.check_and_kill_process(
+            [self.installed_path, "lib/Fritzing"], wait_before=self.TIMEOUT_START
+        )
         proc.wait(self.TIMEOUT_STOP)
 
         # ensure that it's detected as installed:

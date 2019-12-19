@@ -35,24 +35,28 @@ logger = logging.getLogger(__name__)
 
 
 class MavenCategory(umake.frameworks.BaseCategory):
-
     def __init__(self):
-        super().__init__(name="Maven", description=_("Java software project management and comprehension tool"),
-                         logo_path=None)
+        super().__init__(
+            name="Maven",
+            description=_("Java software project management and comprehension tool"),
+            logo_path=None,
+        )
 
 
 class MavenLang(umake.frameworks.baseinstaller.BaseInstaller):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Maven Lang", description=_("Java software project management and comprehension tool"),
-                         is_category_default=True,
-                         packages_requirements=["openjdk-7-jdk | openjdk-8-jdk | openjdk-11-jdk"],
-                         checksum_type=ChecksumType.sha512,
-                         match_last_link=True,
-                         download_page="https://maven.apache.org/download.cgi",
-                         dir_to_decompress_in_tarball="apache-maven-*",
-                         required_files_path=[os.path.join("bin", "mvn")],
-                         **kwargs)
+        super().__init__(
+            name="Maven Lang",
+            description=_("Java software project management and comprehension tool"),
+            is_category_default=True,
+            packages_requirements=["openjdk-7-jdk | openjdk-8-jdk | openjdk-11-jdk"],
+            checksum_type=ChecksumType.sha512,
+            match_last_link=True,
+            download_page="https://maven.apache.org/download.cgi",
+            dir_to_decompress_in_tarball="apache-maven-*",
+            required_files_path=[os.path.join("bin", "mvn")],
+            **kwargs
+        )
         self.url = None
         self.new_download_url = None
 
@@ -73,11 +77,15 @@ class MavenLang(umake.frameworks.baseinstaller.BaseInstaller):
     @MainLoop.in_mainloop_thread
     def get_sha_and_start_download(self, download_result):
         res = download_result[self.new_download_url]
-        checksum = res.buffer.getvalue().decode('utf-8').split()[0]
-        logger.debug("Found download link for {}, checksum: {}".format(self.url, checksum))
+        checksum = res.buffer.getvalue().decode("utf-8").split()[0]
+        logger.debug(
+            "Found download link for {}, checksum: {}".format(self.url, checksum)
+        )
         self.check_data_and_start_download(self.url, checksum)
 
     def post_install(self):
         """Add the necessary Maven environment variables"""
-        add_env_to_user(self.name, {"PATH": {"value": os.path.join(self.install_path, "bin")}})
+        add_env_to_user(
+            self.name, {"PATH": {"value": os.path.join(self.install_path, "bin")}}
+        )
         UI.delayed_display(DisplayMessage(self.RELOGIN_REQUIRE_MSG.format(self.name)))

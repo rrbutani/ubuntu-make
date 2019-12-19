@@ -32,7 +32,9 @@ class MavenTests(LargeFrameworkTests):
 
     def setUp(self):
         super().setUp()
-        self.installed_path = os.path.join(self.install_base_path, "maven", "maven-lang")
+        self.installed_path = os.path.join(
+            self.install_base_path, "maven", "maven-lang"
+        )
         self.framework_name_for_profile = "Maven Lang"
 
     @property
@@ -42,10 +44,14 @@ class MavenTests(LargeFrameworkTests):
     def test_default_maven_install(self):
         """Install Maven from scratch test case"""
 
-        self.child = spawn_process(self.command('{} maven'.format(UMAKE)))
-        self.expect_and_no_warn("Choose installation path: {}".format(self.installed_path))
+        self.child = spawn_process(self.command("{} maven".format(UMAKE)))
+        self.expect_and_no_warn(
+            "Choose installation path: {}".format(self.installed_path)
+        )
         self.child.sendline("")
-        self.expect_and_no_warn("Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS)
+        self.expect_and_no_warn(
+            "Installation done", timeout=self.TIMEOUT_INSTALL_PROGRESS
+        )
         self.wait_and_close()
 
         self.assert_exec_exists()

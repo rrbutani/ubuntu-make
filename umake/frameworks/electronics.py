@@ -33,8 +33,15 @@ import subprocess
 
 import umake.frameworks.baseinstaller
 from umake.interactions import DisplayMessage
-from umake.tools import as_root, create_launcher, get_application_desktop_file, ChecksumType,\
-    MainLoop, get_current_arch, get_current_distro_version
+from umake.tools import (
+    as_root,
+    create_launcher,
+    get_application_desktop_file,
+    ChecksumType,
+    MainLoop,
+    get_current_arch,
+    get_current_distro_version,
+)
 from umake.ui import UI
 
 logger = logging.getLogger(__name__)
@@ -55,8 +62,9 @@ def _add_to_group(user, group):
 
 class ElectronicsCategory(umake.frameworks.BaseCategory):
     def __init__(self):
-        super().__init__(name="Electronics", description=_("Electronics software"),
-                         logo_path=None)
+        super().__init__(
+            name="Electronics", description=_("Electronics software"), logo_path=None
+        )
 
 
 class Arduino(umake.frameworks.baseinstaller.BaseInstaller):
@@ -69,28 +77,33 @@ class Arduino(umake.frameworks.baseinstaller.BaseInstaller):
         if os.geteuid() != 0:
             self._current_user = os.getenv("USER")
         self._current_user = pwd.getpwuid(int(os.getenv("SUDO_UID", default=0))).pw_name
-        for group_name in [g.gr_name for g in grp.getgrall() if self._current_user in g.gr_mem]:
+        for group_name in [
+            g.gr_name for g in grp.getgrall() if self._current_user in g.gr_mem
+        ]:
             if group_name == self.ARDUINO_GROUP:
                 self.was_in_arduino_group = True
                 break
         else:
             self.was_in_arduino_group = False
 
-        super().__init__(name="Arduino",
-                         description=_("The Arduino Software Distribution"),
-                         only_on_archs=['i386', 'amd64', 'armhf'],
-                         download_page='https://www.arduino.cc/en/Main/Software',
-                         dir_to_decompress_in_tarball='arduino-*',
-                         desktop_filename='arduino.desktop',
-                         checksum_type=ChecksumType.sha512,
-                         packages_requirements=['gcc-avr', 'avr-libc'],
-                         need_root_access=not self.was_in_arduino_group,
-                         required_files_path=["arduino"], **kwargs)
+        super().__init__(
+            name="Arduino",
+            description=_("The Arduino Software Distribution"),
+            only_on_archs=["i386", "amd64", "armhf"],
+            download_page="https://www.arduino.cc/en/Main/Software",
+            dir_to_decompress_in_tarball="arduino-*",
+            desktop_filename="arduino.desktop",
+            checksum_type=ChecksumType.sha512,
+            packages_requirements=["gcc-avr", "avr-libc"],
+            need_root_access=not self.was_in_arduino_group,
+            required_files_path=["arduino"],
+            **kwargs
+        )
 
     arch_trans = {
         "amd64": "64",
         "i386": "32",
-        "armhf": "arm"  # This should work on the raspberryPi
+        "armhf": "arm",  # This should work on the raspberryPi
     }
 
     def parse_download_link(self, line, in_download):
@@ -108,48 +121,66 @@ class Arduino(umake.frameworks.baseinstaller.BaseInstaller):
     @MainLoop.in_mainloop_thread
     def get_sha_and_start_download(self, download_result):
         res = download_result[self.new_download_url].buffer.getvalue().decode()
-        line = re.search(r'.*linux{}.tar.xz'.format(self.arch_trans[get_current_arch()]), res).group(0)
+        line = re.search(
+            r".*linux{}.tar.xz".format(self.arch_trans[get_current_arch()]), res
+        ).group(0)
         # you get and store url and checksum
         checksum = line.split()[0]
-        url = os.path.join(self.new_download_url.rpartition('/')[0], line.split()[1])
+        url = os.path.join(self.new_download_url.rpartition("/")[0], line.split()[1])
         self.check_data_and_start_download(url, checksum)
 
     def post_install(self):
         """Create the Arduino launcher"""
-        icon_path = join(self.install_path, 'lib', 'arduino_icon.ico')
+        icon_path = join(self.install_path, "lib", "arduino_icon.ico")
         comment = _("The Arduino Software IDE")
         categories = "Development;IDE;"
-        create_launcher(self.desktop_filename,
-                        get_application_desktop_file(name=_("Arduino"),
-                                                     icon_path=icon_path,
-                                                     try_exec=self.exec_path,
-                                                     exec=self.exec_link_name,
-                                                     comment=comment,
-                                                     categories=categories))
+        create_launcher(
+            self.desktop_filename,
+            get_application_desktop_file(
+                name=_("Arduino"),
+                icon_path=icon_path,
+                try_exec=self.exec_path,
+                exec=self.exec_link_name,
+                comment=comment,
+                categories=categories,
+            ),
+        )
         # add the user to arduino group
         if not self.was_in_arduino_group:
             with futures.ProcessPoolExecutor(max_workers=1) as executor:
-                f = executor.submit(_add_to_group, self._current_user, self.ARDUINO_GROUP)
+                f = executor.submit(
+                    _add_to_group, self._current_user, self.ARDUINO_GROUP
+                )
                 if not f.result():
                     UI.return_main_screen(status_code=1)
-            UI.delayed_display(DisplayMessage(_("You need to logout and login again for your installation to work")))
+            UI.delayed_display(
+                DisplayMessage(
+                    _(
+                        "You need to logout and login again for your installation to work"
+                    )
+                )
+            )
 
 
 class Eagle(umake.frameworks.baseinstaller.BaseInstaller):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Eagle", description=_("PCB design software for students, makers, and professionals"),
-                         only_on_archs=['amd64'],
-                         download_page="https://eagle-updates.circuits.io/downloads/latest.html",
-                         desktop_filename="eagle.desktop",
-                         required_files_path=["eagle"],
-                         dir_to_decompress_in_tarball="eagle-*",
-                         **kwargs)
+        super().__init__(
+            name="Eagle",
+            description=_(
+                "PCB design software for students, makers, and professionals"
+            ),
+            only_on_archs=["amd64"],
+            download_page="https://eagle-updates.circuits.io/downloads/latest.html",
+            desktop_filename="eagle.desktop",
+            required_files_path=["eagle"],
+            dir_to_decompress_in_tarball="eagle-*",
+            **kwargs
+        )
 
     def parse_download_link(self, line, in_download):
         """Parse Eagle download links"""
         url = None
-        if '.tar.gz' in line:
+        if ".tar.gz" in line:
             p = re.search(r'href="([^<]*.tar.gz)"', line)
             with suppress(AttributeError):
                 url = p.group(1)
@@ -157,65 +188,91 @@ class Eagle(umake.frameworks.baseinstaller.BaseInstaller):
 
     def post_install(self):
         """Create the Eagle launcher"""
-        create_launcher(self.desktop_filename, get_application_desktop_file(name=_("Eagle"),
-                        icon_path=os.path.join(self.install_path, "bin", "eagle-logo.png"),
-                        try_exec=self.exec_path,
-                        exec=self.exec_link_name,
-                        comment=self.description,
-                        categories="Development;"))
+        create_launcher(
+            self.desktop_filename,
+            get_application_desktop_file(
+                name=_("Eagle"),
+                icon_path=os.path.join(self.install_path, "bin", "eagle-logo.png"),
+                try_exec=self.exec_path,
+                exec=self.exec_link_name,
+                comment=self.description,
+                categories="Development;",
+            ),
+        )
 
 
 class Fritzing(umake.frameworks.baseinstaller.BaseInstaller):
-
     def __init__(self, **kwargs):
-        super().__init__(name="Fritzing",
-                         description=_("Electronic Design Automation software with a low entry barrier"),
-                         only_on_archs=['amd64'],
-                         only_ubuntu=True,
-                         packages_requirements=["libssl1.1 | libssl1.0", "libqt5serialport5",
-                                                "libqt5sql5", "libqt5xml5"],
-                         download_page="https://api.github.com/repos/Fritzing/Fritzing-app/releases/latest",
-                         desktop_filename="fritzing.desktop",
-                         required_files_path=["Fritzing"],
-                         dir_to_decompress_in_tarball="fritzing-*",
-                         json=True, **kwargs)
+        super().__init__(
+            name="Fritzing",
+            description=_(
+                "Electronic Design Automation software with a low entry barrier"
+            ),
+            only_on_archs=["amd64"],
+            only_ubuntu=True,
+            packages_requirements=[
+                "libssl1.1 | libssl1.0",
+                "libqt5serialport5",
+                "libqt5sql5",
+                "libqt5xml5",
+            ],
+            download_page="https://api.github.com/repos/Fritzing/Fritzing-app/releases/latest",
+            desktop_filename="fritzing.desktop",
+            required_files_path=["Fritzing"],
+            dir_to_decompress_in_tarball="fritzing-*",
+            json=True,
+            **kwargs
+        )
 
     @property
     def ubuntu_version(self):
-        if get_current_distro_version().split('.')[0] < "18":
-            return('xenial')
+        if get_current_distro_version().split(".")[0] < "18":
+            return "xenial"
         else:
-            return('bionic')
+            return "bionic"
 
     def parse_download_link(self, line, in_download):
         url = None
         for asset in line["assets"]:
-            if "{}.linux.AMD64.tar.bz2".format(self.ubuntu_version) in asset["browser_download_url"] and \
-               ".md5" not in asset["browser_download_url"]:
+            if (
+                "{}.linux.AMD64.tar.bz2".format(self.ubuntu_version)
+                in asset["browser_download_url"]
+                and ".md5" not in asset["browser_download_url"]
+            ):
                 in_download = True
                 url = asset["browser_download_url"]
         return (url, in_download)
 
     def post_install(self):
         """Create the Fritzing launcher"""
-        create_launcher(self.desktop_filename, get_application_desktop_file(name=_("Fritzing"),
-                        icon_path=os.path.join(self.install_path, "icons", "fritzing_icon.png"),
-                        try_exec=self.exec_path,
-                        exec=self.exec_link_name,
-                        comment=self.description,
-                        categories="Development;"))
+        create_launcher(
+            self.desktop_filename,
+            get_application_desktop_file(
+                name=_("Fritzing"),
+                icon_path=os.path.join(self.install_path, "icons", "fritzing_icon.png"),
+                try_exec=self.exec_path,
+                exec=self.exec_link_name,
+                comment=self.description,
+                categories="Development;",
+            ),
+        )
 
     def install_framework_parser(self, parser):
         this_framework_parser = super().install_framework_parser(parser)
-        this_framework_parser.add_argument('--edge', action="store_true",
-                                           help=_("Install Continuous Build version"))
+        this_framework_parser.add_argument(
+            "--edge", action="store_true", help=_("Install Continuous Build version")
+        )
         return this_framework_parser
 
     def run_for(self, args):
         if args.edge:
             self.name += " Edge"
             self.description += " edge"
-            self.desktop_filename = self.desktop_filename.replace(".desktop", "-edge.desktop")
-            self.download_page = "https://api.github.com/repos/Fritzing/Fritzing-app/releases"
+            self.desktop_filename = self.desktop_filename.replace(
+                ".desktop", "-edge.desktop"
+            )
+            self.download_page = (
+                "https://api.github.com/repos/Fritzing/Fritzing-app/releases"
+            )
             self.install_path += "-edge"
         super().run_for(args)
