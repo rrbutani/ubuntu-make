@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 _current_arch = None
 _foreign_arch = None
 _version = None
-_id = None
+_ids = None
 
 profile_tag = _("# Ubuntu make installation of {}\n")
 
@@ -226,21 +226,23 @@ def add_foreign_arch(new_arch):
     return arch_added
 
 
-def get_current_distro_id():
-    global _id
-    if _id is None:
+def get_current_distro_ids():
+    global _ids
+    if _ids is None:
+        _ids = []
         try:
             with open(settings.OS_RELEASE_FILE) as os_release_file:
                 for line in os_release_file:
                     line = line.strip()
                     if line.startswith('ID='):
-                        _id = line.split('=')[1]
-                        break
+                        _ids.append(line.split('=')[1])
+                    if line.startswith('ID_LIKE='):
+                        _ids.append(line.split('=')[1])
         except (FileNotFoundError, IOError) as e:
             message = "Can't open os-release file: {}".format(e)
             logger.error(message)
             raise BaseException(message)
-    return _id
+    return _ids
 
 
 def get_current_distro_version(distro_name="ubuntu"):
@@ -249,14 +251,23 @@ def get_current_distro_version(distro_name="ubuntu"):
     if _version is None:
         try:
             with open(settings.OS_RELEASE_FILE) as os_release_file:
+                distro_match, distro_like_match = False, False
                 for line in os_release_file:
                     line = line.strip()
                     if line.startswith('ID='):
-                        if line != "ID={}".format(distro_name):
-                            break
+                        if line == "ID={}".format(distro_name):
+                            distro_match = True
                     if line.startswith('VERSION_ID='):
-                        _version = line.split('=')[1].split('"')[1]
-                        break
+                        if distro_match:
+                            _version = line.split('=')[1].split('"')[1]
+                            break
+                    if line.startswith('ID_LIKE='):
+                        if line == "ID_LIKE={}".format(distro_name):
+                            distro_like_match = True
+                    if line.startswith("{}_ID=".format(distro_name.upper())):
+                        if distro_like_match:
+                            _version = line.split('=')[1].split('"')[1]
+                            break
                 else:
                     message = "Couldn't find DISTRIB_RELEASE in {}".format(settings.OS_RELEASE_FILE)
                     logger.error(message)
